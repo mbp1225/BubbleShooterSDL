@@ -2,13 +2,13 @@
  * Teste 2.2
  * Este programa e um prototipo do jogo Bubble Shooter
  * 17/10/16
- * 
+ *
  * Nome: Eduardo Melo
  * DRE: 117200581
  *
  * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
  */
- 
+
 /*Using SDL, SDL_image, standard IO, and strings*/
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -53,7 +53,7 @@ SDL_Window* gWindow = NULL;
 
 /*The imagem character*/
 NPC ball, ballz[2][20];
-  
+
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
 
@@ -98,30 +98,30 @@ void draw(NPC p){
 int clicked = 0;
 int main( int argc, char* args[] ) {
     SDL_Event e;/*Event handler*/
-    SDL_Surface* balls;/*Ball surface*/ 
+    SDL_Surface* balls;/*Ball surface*/
     int quit = false;/*Main loop flag*/
     int Mx, My;
     int i;
-    
+
     /*Start up SDL and create window*/
     if( !init() ) {
         printf( "Failed to initialize!\n" );
         return 1;
     }
-    
+
     /*Load media*/
     if( !loadMedia() ) {
         printf( "Failed to load media!\n" );
         return 2;
     }
-    balls = loadSurface("./circle.jpeg");
-    
+    balls = loadSurface("./Images/circle.jpeg");
+
     /*Create NPC*/
-    ball = createNPC(	(SCREEN_WIDTH/2 - IMAGE_WIDTH/2), 
-                        (SCREEN_HEIGHT - IMAGE_HEIGHT), 
-                        0, 
-                        0, 
-                        balls);   
+    ball = createNPC(	(SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
+                        (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                        0,
+                        0,
+                        balls);
 
     /*While application is running*/
     while( !quit ) {
@@ -133,9 +133,9 @@ int main( int argc, char* args[] ) {
                 case SDL_KEYDOWN:
                     if (e.key.keysym.sym == SDLK_ESCAPE) {
                         quit = true;
-                    }		
+                    }
                     break;
-                       
+
 			case SDL_MOUSEBUTTONDOWN:
 				if (e.button.button == SDL_BUTTON_LEFT && !clicked){
 					SDL_GetMouseState( &Mx, &My );
@@ -145,15 +145,15 @@ int main( int argc, char* args[] ) {
 					/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
 					ball.stepX = Mx/sqrt(Mx*Mx+My*My);
 					ball.stepY = -(My/sqrt(Mx*Mx+My*My));
-					
+
 					/*
 					printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
 					printf("%d, %d\n", Mx, My);
 					*/
-					
+
 					/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS*/
 					if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
-					if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; } 
+					if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
 					/*AUMENTANDO VELOCIDADE DE BALL*/
 					ball.stepY*= MSPEED;
 					ball.stepX*= MSPEED;
@@ -163,28 +163,28 @@ int main( int argc, char* args[] ) {
 
             }
         }
-            
+
         /*Fill the surface white*/
-        SDL_FillRect( gScreenSurface, NULL, 
-                              SDL_MapRGB( gScreenSurface->format, 
+        SDL_FillRect( gScreenSurface, NULL,
+                              SDL_MapRGB( gScreenSurface->format,
                               0xFF, 0xFF, 0xFF ) );
-                              
+
 		if(clicked == 1) moveNPC(&ball);
-        
+
         draw(ball);
         for (i=0; i<BALLX; i++){
-			ballz[0][i] = createNPC( 
-						i*IMAGE_WIDTH, 
-                        0, 
-                        0, 
-                        0, 
+			ballz[0][i] = createNPC(
+						i*IMAGE_WIDTH,
+                        0,
+                        0,
+                        0,
                         balls);
 			 draw (ballz[0][i]);
 		 }
-        
+
         /*Update the surface*/
         SDL_UpdateWindowSurface( gWindow );
-                
+
         /* Not so good solution, depends on your computer*/
         SDL_Delay(5);
     }
@@ -198,12 +198,12 @@ int main( int argc, char* args[] ) {
 
 void moveNPC(NPC *p) {
     int col;
-    
+
     p->posX += p->stepX;
     p->posY += p->stepY;
-	
+
 	col = checkCollision();
-	
+
 	if (col)
 	{
 		p->posX = (p->posX >= 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
@@ -211,19 +211,19 @@ void moveNPC(NPC *p) {
         p->stepX = 0;
         p->posY = IMAGE_HEIGHT - 4;
 	}
-    
+
     if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
          (p->posX < 0) ) {
         p->stepX = -p->stepX;
-        p->posX += p->stepX; 
+        p->posX += p->stepX;
     }
     if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
          (p->posY < 0) ) {
         p->stepY = 0;
         p->posY = 0;
         p->stepX = 0;
-    }  
-    
+    }
+
 }
 
 int checkCollision()
@@ -243,15 +243,15 @@ int checkCollision()
 	}
 	return 0;
 }
-		
-		
+
+
 
 
 /*Create NPC*/
-NPC createNPC( float posX, float posY, float stepX, float stepY, 
+NPC createNPC( float posX, float posY, float stepX, float stepY,
                SDL_Surface *image) {
     NPC p;
-    
+
     p.posX = posX;
     p.posY = posY;
     p.stepX = stepX;
@@ -292,7 +292,7 @@ int init() {
         }
     }
 
-   
+
 
     return success;
 }
@@ -301,13 +301,13 @@ int loadMedia() {
     /*Loading success flag*/
     int success = true;
     /*uint32_t colorKey;*/
-    
+
     /*Load PNG surface*/
-    gJPGSurface = loadSurface( "./circle.jpeg" );
+    gJPGSurface = loadSurface( "./Images/circle.jpeg" );
     if( gJPGSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
-    } 
+    }
     return success;
 }
 
