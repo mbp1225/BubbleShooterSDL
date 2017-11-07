@@ -143,6 +143,10 @@ int main( int argc, char* args[] ) {
 					Mx = Mx - SCREEN_WIDTH/2;
 					My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
 					/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+
+                    ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
+                    ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+
 					ball.stepX = Mx/sqrt(Mx*Mx+My*My);
 					ball.stepY = -(My/sqrt(Mx*Mx+My*My));
 
@@ -210,6 +214,7 @@ void moveNPC(NPC *p) {
 		p->stepY = 0;
         p->stepX = 0;
         p->posY = IMAGE_HEIGHT - 5;
+        clicked = 0;
 	}
 
     if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
