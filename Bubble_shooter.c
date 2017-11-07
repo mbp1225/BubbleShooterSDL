@@ -114,7 +114,7 @@ int main( int argc, char* args[] ) {
         printf( "Failed to load media!\n" );
         return 2;
     }
-    balls = loadSurface("./Images/circle.jpeg");
+    balls = loadSurface("./Images/blue.tga");
 
     /*Create NPC*/
     ball = createNPC(	(SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
@@ -209,7 +209,7 @@ void moveNPC(NPC *p) {
 		p->posX = (p->posX >= 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
 		p->stepY = 0;
         p->stepX = 0;
-        p->posY = IMAGE_HEIGHT - 4;
+        p->posY = IMAGE_HEIGHT - 5;
 	}
 
     if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
@@ -303,10 +303,15 @@ int loadMedia() {
     /*uint32_t colorKey;*/
 
     /*Load PNG surface*/
-    gJPGSurface = loadSurface( "./Images/circle.jpeg" );
+    gJPGSurface = loadSurface( "./Images/blue.tga" );
     if( gJPGSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
+    }
+    else
+    {
+        Uint32 colorkey = SDL_MapRGB( gJPGSurface->format, 0, 0xFF, 0 );
+        SDL_SetColorKey( gJPGSurface,1, colorkey );
     }
     return success;
 }
@@ -339,6 +344,11 @@ SDL_Surface* loadSurface( char *path ) {
         optimizedSurface = SDL_ConvertSurface( loadedSurface, gScreenSurface->format, 0 );
         if( optimizedSurface == NULL ) {
             printf( "Unable to optimize image %s! SDL Error: %s\n", path, SDL_GetError() );
+        }
+        else
+        {
+            Uint32 colorkey = SDL_MapRGB( optimizedSurface->format, 0, 0xFF, 0 );
+            SDL_SetColorKey( optimizedSurface,1, colorkey );
         }
 
         /*Get rid of old loaded surface*/
