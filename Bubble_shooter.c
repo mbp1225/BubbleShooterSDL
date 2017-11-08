@@ -7,6 +7,7 @@
  * DRE: 117200581
  *
  * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
+ * a
  */
 
 /*Using SDL, SDL_image, standard IO, and strings*/
