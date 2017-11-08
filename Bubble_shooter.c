@@ -1,13 +1,19 @@
 /*
- * Teste 2.2
+ * Teste 2.3
  * Este programa e um prototipo do jogo Bubble Shooter
  * 17/10/16
  *
  * Nome: Eduardo Melo
  * DRE: 117200581
+ * 
+ * Nome: Matheus Pinheiro
+ * DRE: 117249179
+ *
+ * Nome: Rafael da Silva Fernandes
+ * DRE: 117196229
  *
  * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
- * a
+ * 
  */
 
 /*Using SDL, SDL_image, standard IO, and strings*/
