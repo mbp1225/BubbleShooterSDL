@@ -186,6 +186,10 @@ int main( int argc, char* args[] ) {
 			 draw (ballz[0][i]);
 		 }
 
+         for (i=0; i<BALLX-1; i++){
+ 			 draw (ballz[1][i]);
+ 		 }
+
         /*Update the surface*/
         SDL_UpdateWindowSurface( gWindow );
 
@@ -202,6 +206,8 @@ int main( int argc, char* args[] ) {
 
 void moveNPC(NPC *p) {
     int col;
+    SDL_Surface* balls;/*Ball surface*/
+    balls = loadSurface("./Images/blue.tga");
 
     p->posX += p->stepX;
     p->posY += p->stepY;
@@ -214,7 +220,29 @@ void moveNPC(NPC *p) {
 		p->stepY = 0;
         p->stepX = 0;
         p->posY = IMAGE_HEIGHT - 5;
+
+        if(p->posX < col * IMAGE_WIDTH)
+        {
+            ballz[1][col-1] = createNPC(
+                        (col*IMAGE_WIDTH) - (IMAGE_WIDTH/2),
+                         IMAGE_HEIGHT - 5,
+                         0,
+                         0,
+                         balls);
+        }
+        else
+        {
+            ballz[1][col] = createNPC(
+                        (col*IMAGE_WIDTH) + (IMAGE_WIDTH/2),
+                         IMAGE_HEIGHT - 5,
+                         0,
+                         0,
+                         balls);
+        }
+
+
         clicked = 0;
+        return;
 	}
 
     if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
