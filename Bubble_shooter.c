@@ -171,7 +171,7 @@ int main( int argc, char* args[] ) {
         /*Fill the surface white*/
         SDL_FillRect( gScreenSurface, NULL,
                               SDL_MapRGB( gScreenSurface->format,
-                              0xFF, 0xFF, 0xFF ) );
+                              0xFF, 0xFF, 0xFA ) );
 
 		if(clicked == 1) moveNPC(&ball);
 
