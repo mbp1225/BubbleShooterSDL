@@ -32,7 +32,10 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+/*Velocidade da bolha*/
 const int MSPEED = 8;
+
+/*Quantidade de bolhas na primeira linha*/
 const int BALLX = 20;
 
 const int false = 0;
@@ -54,12 +57,14 @@ typedef struct _NPC  {
 /*
  * Global Variables
  */
+ 
+int clicked = 0;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
 
-/*The imagem character*/
-NPC ball, ballz[2][20];
+/*The image character*/
+NPC ball, ballz[10][20];
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
@@ -92,6 +97,7 @@ void moveNPC(NPC *p);
 /*Checks Collision*/
 int checkCollision();
 
+/*Preenche primeira fileira com as bolinhas*/
 void draw(NPC p){
 	SDL_Rect srcRect, dstRect;
 	srcRect.x = 0; srcRect.y = 0;
@@ -102,7 +108,6 @@ void draw(NPC p){
 	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
 }
 
-int clicked = 0;
 int main( int argc, char* args[] ) {
     SDL_Event e;/*Event handler*/
     SDL_Surface* balls;/*Ball surface*/
@@ -124,11 +129,11 @@ int main( int argc, char* args[] ) {
     balls = loadSurface("./Images/blue.tga");
 
     /*Create NPC*/
-    ball = createNPC(	(SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                        (SCREEN_HEIGHT - IMAGE_HEIGHT),
-                        0,
-                        0,
-                        balls);
+    ball = createNPC((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
+                     (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                      0,
+                      0,
+                      balls);
 
     /*While application is running*/
     while( !quit ) {
@@ -138,9 +143,7 @@ int main( int argc, char* args[] ) {
                     quit = true;
                     break;
                 case SDL_KEYDOWN:
-                    if (e.key.keysym.sym == SDLK_ESCAPE) {
-                        quit = true;
-                    }
+                    if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
                     break;
 
 			case SDL_MOUSEBUTTONDOWN:
@@ -149,26 +152,32 @@ int main( int argc, char* args[] ) {
 					/*REINTERPRETANDO Mx E My COM ORIGEM NO CENTRO DE BALL*/
 					Mx = Mx - SCREEN_WIDTH/2;
 					My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
-					/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+                    /*CLICK NAO FUNCIONA SE MY < CENTRO DA BOLINHA*/
+					if(My > 0){
+						/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+						ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
+						ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
 
-                    ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
-                    ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+						/* CASO NECESSARIO, SABER QUAL STEPX E STEPY
+						printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
+						printf("%d, %d\n", Mx, My);
+						*/
 
-					ball.stepX = Mx/sqrt(Mx*Mx+My*My);
-					ball.stepY = -(My/sqrt(Mx*Mx+My*My));
-
-					/*
-					printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
-					printf("%d, %d\n", Mx, My);
-					*/
-
-					/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS*/
-					if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
-					if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
-					/*AUMENTANDO VELOCIDADE DE BALL*/
-					ball.stepY*= MSPEED;
-					ball.stepX*= MSPEED;
-					clicked = 1;
+						/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS
+                         * sen 8 = 0.99
+                         * cos 8 = -0.139
+                         */
+                         
+						if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
+						if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
+						ball.stepY*= MSPEED;
+						ball.stepX*= MSPEED;
+						clicked = 1;
+						/* P/ TESTAR A BOLINHA IR RETO
+						 * ball.stepX = 0;
+						 * ball.stepY = -8
+						 */
+						}
 				}
 					break;
 
@@ -176,14 +185,14 @@ int main( int argc, char* args[] ) {
         }
 
         /*Fill the surface white*/
-        SDL_FillRect( gScreenSurface, NULL,
-                              SDL_MapRGB( gScreenSurface->format,
-                              0xFF, 0xFF, 0xFA ) );
+        SDL_FillRect( gScreenSurface, NULL, 
+					SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
 
 		if(clicked == 1) moveNPC(&ball);
 
         draw(ball);
-        for (i=0; i<BALLX; i++){
+        
+        for (i = 0; i < BALLX; i++){
 			ballz[0][i] = createNPC(
 						i*IMAGE_WIDTH,
                         0,
@@ -192,7 +201,7 @@ int main( int argc, char* args[] ) {
                         balls);
 			 draw (ballz[0][i]);
 		 }
-
+		 
          for (i=0; i<BALLX-1; i++){
  			 draw (ballz[1][i]);
  		 }
@@ -213,72 +222,68 @@ int main( int argc, char* args[] ) {
 
 void moveNPC(NPC *p) {
     int col;
-    SDL_Surface* balls;/*Ball surface*/
-    balls = loadSurface("./Images/blue.tga");
-
-    p->posX += p->stepX;
-    p->posY += p->stepY;
-
-	col = checkCollision();
-
-	if (col)
-	{
-		p->posX = (p->posX >= 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
-		p->stepY = 0;
-        p->stepX = 0;
-        p->posY = IMAGE_HEIGHT - 5;
-
-        if(p->posX < col * IMAGE_WIDTH)
-        {
-            ballz[1][col-1] = createNPC(
-                        (col*IMAGE_WIDTH) - (IMAGE_WIDTH/2),
-                         IMAGE_HEIGHT - 5,
-                         0,
-                         0,
-                         balls);
-        }
-        else
-        {
-            ballz[1][col] = createNPC(
-                        (col*IMAGE_WIDTH) + (IMAGE_WIDTH/2),
-                         IMAGE_HEIGHT - 5,
-                         0,
-                         0,
-                         balls);
-        }
-
-
-        clicked = 0;
-        return;
-	}
-
-    if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
-         (p->posX < 0) ) {
-        p->stepX = -p->stepX;
+    
+    if (clicked == 1){
         p->posX += p->stepX;
-    }
-    if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
-         (p->posY < 0) ) {
-        p->stepY = 0;
-        p->posY = 0;
-        p->stepX = 0;
-    }
+        p->posY += p->stepY;
 
+        col = checkCollision();
+        /*Corrige o fato da bola jogada nao estar precisamente entre outras duas paradas*/
+
+        if (col && p->stepX != 0)
+        { 
+			col--;
+            /*A primeira linha p->posX está com (p->poX *>* 0)
+             *e não com *>=*
+             *pois a bola parada está eternamente em colisão, 
+             *o que faz com que o ternário abaixo
+             *entrasse em suas duas condições
+             * 
+             * Recalcular collision de acordo com distX*/
+            p->posX = (p->posX > 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
+            p->stepY = 0;
+            p->stepX = 0;
+            p->posY = IMAGE_HEIGHT - 5;
+            /*clicked = 0 permite ao usuario jogar mais uma bolinha*/
+            clicked = 0; 
+        }
+
+        if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
+             (p->posX < 0) )
+        {
+            p->stepX = -p->stepX;
+            p->posX += p->stepX;
+        }
+        if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
+             (p->posY < 0) ) 
+        {
+            p->stepY = 0;
+            p->posY = 0;
+            p->stepX = 0;
+        }
+    }
 }
 
-int checkCollision()
-{
+int checkCollision(){ /*REFAZER TESTE DE COLISAO*/
 	int i;
+    /*Dist = distancia do centro da bolinha i ate o centro da bolinha que esta se movendo*/
 	float distX, distY, dist;
-	for(i=0; i<BALLX; i++)
+	for(i = 0; i < BALLX; i++)
 	{
-		distX = ball.posX - ballz[0][i].posX + IMAGE_WIDTH/2;
-		distY = ball.posY - ballz[0][i].posY + IMAGE_HEIGHT/2;
-		dist = sqrt(distX*distX + distY*distY);
+		distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[0][i].posX + IMAGE_WIDTH/2);
+		distY = (ball.posY + IMAGE_WIDTH/2) - (ballz[0][i].posY + IMAGE_HEIGHT/2);
+		dist = sqrt((distX*distX) + (distY*distY));
+        /* 
+         * em dist *<=* IMAGE_WIDTH,
+         * o *<=* esta presente pois do contrario
+         * quando lançada em um angulo de 90 graus,
+         * a bolinha nao colidia
+         */
 		if (dist <= IMAGE_WIDTH)
 		{
-			/*printf("%d\n", i);*/
-			return i;
+			printf("bolinha da colisão = %d\n", i);
+            printf("distX = %f\n", distX);
+			return i+1;
 		}
 	}
 	return 0;
@@ -343,7 +348,8 @@ int loadMedia() {
     /*uint32_t colorKey;*/
 
     /*Load PNG surface*/
-    gJPGSurface = loadSurface( "./Images/blue.tga" );
+    /*NAO ESTA IMPORTANDO QUAL COR E COLOCADA AQUI*/
+    gJPGSurface = loadSurface( "./Images/red.tga" );
     if( gJPGSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
@@ -354,7 +360,7 @@ int loadMedia() {
         SDL_SetColorKey( gJPGSurface,1, colorkey );
     }
     return success;
-}
+}                                                                                         
 
 void closing() {
     /*Free loaded image*/
