@@ -203,7 +203,7 @@ int main( int argc, char* args[] ) {
         {
 			for (i = 1; i <= BALLY; i++)
 			{
-				for (j = 1; j <= 15; j++)
+				for (j = 1; j <= BALLX; j++)
 				{
 					if (j % 2 == 0)
 					{
@@ -266,7 +266,7 @@ void moveNPC(NPC *p) {
         if (hitPos.indexX)
         {
 			distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[hitPos.indexX][hitPos.indexY].posX);
-			printf("X = %d, Y = %d\n",hitPos.indexX,hitPos.indexY);
+			printf("X = %d, Y = %d\n",hitPos.indexY,hitPos.indexX);
 			ball.stepX = 0;
 			ball.stepY = 0;
             ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
