@@ -5,7 +5,7 @@
  *
  * Nome: Eduardo Melo
  * DRE: 117200581
- * 
+ *
  * Nome: Matheus Pinheiro
  * DRE: 117249179
  *
@@ -13,7 +13,7 @@
  * DRE: 117196229
  *
  * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
- * 
+ *
  */
 
 /*Using SDL, SDL_image, standard IO, and strings*/
@@ -45,7 +45,7 @@ const int true = 1;
 const int IMAGE_WIDTH = 32;
 const int IMAGE_HEIGHT = 32;
 
-typedef struct _NPC 
+typedef struct _NPC
 {
     float posX;
     float posY;
@@ -65,14 +65,14 @@ typedef struct _POS
 /*
  * Global Variables
  */
- 
+
 int clicked = 0;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
 
 /*The image character*/
-NPC ball, ballz[15][20];
+NPC ball, ballz[15][21];
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
@@ -175,7 +175,7 @@ int main( int argc, char* args[] ) {
                          * sen 8 = 0.99
                          * cos 8 = -0.139
                          */
-                         
+
 						if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
 						if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
 						ball.stepY*= MSPEED;
@@ -193,50 +193,50 @@ int main( int argc, char* args[] ) {
         }
 
         /*Fill the surface white*/
-        SDL_FillRect( gScreenSurface, NULL, 
+        SDL_FillRect( gScreenSurface, NULL,
 					SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
 
 		if(clicked == 1) moveNPC(&ball);
         draw(ball);
-        
+
         if(noBalls)
         {
 			for (i = 1; i <= BALLY; i++)
 			{
 				for (j = 1; j <= 15; j++)
 				{
-					if (j % 2 == 0) 
+					if (j % 2 == 0)
 					{
 						ballz[j][i] = createNPC(
 								(i-1)*IMAGE_WIDTH + (IMAGE_WIDTH/2) - (IMAGE_WIDTH/4),
-								(j-1) * IMAGE_HEIGHT + (IMAGE_WIDTH/4),
+								(j-1) * IMAGE_HEIGHT + (IMAGE_HEIGHT/4)-(5*(j-1)),
 								0,
 								0,
 								balls);
 					}
-					else 
+					else
 					{
 						ballz[j][i] = createNPC(
 								(i-1)*IMAGE_WIDTH + (IMAGE_WIDTH) - (IMAGE_WIDTH/4),
-								(j-1) * IMAGE_HEIGHT + (IMAGE_WIDTH/4),
+								(j-1) * IMAGE_HEIGHT + (IMAGE_HEIGHT/4)-(5*(j-1)),
 								0,
 								0,
 								balls);
 					}
-					
-					
+
+
 				 }
 			}
 			noBalls = 0;
-		} 
-		
+		}
+
 		for (i = 1; i <= BALLY; i++)
         {
 			for (j = 1; j <= BALLX; j++)
 			{
 				draw (ballz[j][i]);
 			}
-		} 
+		}
 
         /*Update the surface*/
         SDL_UpdateWindowSurface( gWindow );
@@ -255,7 +255,7 @@ int main( int argc, char* args[] ) {
 void moveNPC(NPC *p) {
     POS hitPos;
     float distX;
-    
+
     if (clicked == 1){
         p->posX += p->stepX;
         p->posY += p->stepY;
@@ -264,25 +264,28 @@ void moveNPC(NPC *p) {
         /*Corrige o fato da bola jogada nao estar precisamente entre outras duas paradas*/
 
         if (hitPos.indexX)
-        { 
+        {
 			distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[hitPos.indexX][hitPos.indexY].posX);
-			printf("%.2f distance on X axis\n",distX);
+			printf("X = %d, Y = %d\n",hitPos.indexX,hitPos.indexY);
 			ball.stepX = 0;
 			ball.stepY = 0;
+            ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
+            ball.posY = SCREEN_HEIGHT - IMAGE_HEIGHT;
+            clicked = 0;
             /*A primeira linha p->posX está com (p->poX *>* 0)
              *e não com *>=*
-             *pois a bola parada está eternamente em colisão, 
+             *pois a bola parada está eternamente em colisão,
              *o que faz com que o ternário abaixo
              *entrasse em suas duas condições
-             * 
+             *
              * Recalcular collision de acordo com distX
-             * 
+             *
             p->posX = (p->posX > 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
             p->stepY = 0;
             p->stepX = 0;
             p->posY = IMAGE_HEIGHT - 5;
             clicked = 0 permite ao usuario jogar mais uma bolinha
-            clicked = 0; 
+            clicked = 0;
         }
 
         if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
@@ -292,7 +295,7 @@ void moveNPC(NPC *p) {
             p->posX += p->stepX;
         }
         if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
-             (p->posY < 0) ) 
+             (p->posY < 0) )
         {
             p->stepY = 0;
             p->posY = 0;
@@ -306,10 +309,10 @@ void moveNPC(NPC *p) {
 POS checkCollision(){ /*REFAZER TESTE DE COLISAO*/
 	int i,j;
 	POS colPosition;
-	float dist,distX,distY; 
-	
-	
-		
+	float dist,distX,distY;
+
+
+
     /*Dist = distancia do centro da bolinha i ate o centro da bolinha que esta se movendo*/
 	/*float distX, distY, dist;*/
 	/*for(i = 0; i < BALLX; i++)
@@ -317,7 +320,7 @@ POS checkCollision(){ /*REFAZER TESTE DE COLISAO*/
 		distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[0][i].posX + IMAGE_WIDTH/2);
 		distY = (ball.posY + IMAGE_WIDTH/2) - (ballz[0][i].posY + IMAGE_HEIGHT/2);
 		dist = sqrt((distX*distX) + (distY*distY));
-        * 
+        *
          * em dist *<=* IMAGE_WIDTH,
          * o *<=* esta presente pois do contrario
          * quando lançada em um angulo de 90 graus,
@@ -331,7 +334,7 @@ POS checkCollision(){ /*REFAZER TESTE DE COLISAO*/
 			return i+1;
 		}
 		* */
-	
+
 	for (i = 1; i <= BALLY; i++)
 	{
 		for (j = 1; j <= BALLX; j++)
@@ -339,26 +342,26 @@ POS checkCollision(){ /*REFAZER TESTE DE COLISAO*/
 			if ((!(ballz[j][i-1]).image || !(ballz[j][i+1]).image ||
 				!(ballz[j+1][i]).image || !(ballz[j-1][i]).image ||
 				!(ballz[j+1][i+1]).image || !(ballz[j+1][i+1]).image)
-				&&(ballz[j][i+1]).image)
+				&&(ballz[j][i]).image)
 			{
 					distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[j][i].posX + IMAGE_WIDTH/2);
 					distY = (ball.posY + IMAGE_WIDTH/2) - (ballz[j][i].posY + IMAGE_HEIGHT/2);
 					dist = sqrt((distX*distX) + (distY*distY));
-					
+
 					if (dist < IMAGE_WIDTH)
 					{
 						colPosition.indexX = j;
 						colPosition.indexY = i;
 						return colPosition;
 					}
-					
-			}					
+
+			}
 		 }
 	}
 	/*}*/
 	colPosition.indexX = 0;
 	colPosition.indexY = 0;
-		
+
 	return colPosition;
 }
 
@@ -433,7 +436,7 @@ int loadMedia() {
         SDL_SetColorKey( gJPGSurface,1, colorkey );
     }
     return success;
-}                                                                                         
+}
 
 void closing() {
     /*Free loaded image*/
