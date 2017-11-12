@@ -230,9 +230,9 @@ int main( int argc, char* args[] ) {
 			noBalls = 0;
 		}
 
-		for (i = 1; i <= BALLY; i++)
+		for (i = 1; i <= 21; i++)
         {
-			for (j = 1; j <= BALLX; j++)
+			for (j = 1; j <= 15; j++)
 			{
 				draw (ballz[j][i]);
 			}
@@ -256,6 +256,9 @@ void moveNPC(NPC *p) {
     POS hitPos;
     float distX;
 
+    SDL_Surface* balls;/*Ball surface*/
+    balls = loadSurface("./Images/blue.tga");
+
     if (clicked == 1){
         p->posX += p->stepX;
         p->posY += p->stepY;
@@ -265,12 +268,31 @@ void moveNPC(NPC *p) {
 
         if (hitPos.indexX)
         {
-			distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[hitPos.indexX][hitPos.indexY].posX);
+			distX = (ball.posX + IMAGE_WIDTH/2) - (ballz[hitPos.indexX][hitPos.indexY].posX + IMAGE_WIDTH/2);
 			printf("X = %d, Y = %d\n",hitPos.indexY,hitPos.indexX);
+            printf("X axis distance of %.1f\n", distX);
 			ball.stepX = 0;
 			ball.stepY = 0;
             ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
             ball.posY = SCREEN_HEIGHT - IMAGE_HEIGHT;
+            if (distX > 0)
+            {
+                ballz[hitPos.indexX+1][hitPos.indexY] = createNPC(
+                        (hitPos.indexY)*IMAGE_WIDTH + (IMAGE_WIDTH/2) - (IMAGE_WIDTH/4),
+                        (hitPos.indexX) * IMAGE_HEIGHT + (IMAGE_HEIGHT/4)-(5*(hitPos.indexX)),
+                        0,
+                        0,
+                        balls);
+            }
+            else
+            {
+                ballz[hitPos.indexX+1][hitPos.indexY-1] = createNPC(
+                        (hitPos.indexY+1)*IMAGE_WIDTH + (IMAGE_WIDTH/2) - (IMAGE_WIDTH/4),
+                        (hitPos.indexX) * IMAGE_HEIGHT + (IMAGE_HEIGHT/4)-(5*(hitPos.indexX)),
+                        0,
+                        0,
+                        balls);
+            }
             clicked = 0;
             /*A primeira linha p->posX está com (p->poX *>* 0)
              *e não com *>=*
