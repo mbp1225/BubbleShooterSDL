@@ -36,7 +36,7 @@ const int SCREEN_HEIGHT = 480;
 const int MSPEED = 8;
 
 /*Quantidade de bolhas na primeira linha*/
-const int BALLX = 19;
+const int BALLX = 20;
 const int BALLY = 1;
 
 const int false = 0;
@@ -80,7 +80,7 @@ SDL_Window* gWindow = NULL;
 PLAYER ball;
 
 /*Ball Grid*/
-NPC ballgrid[1][19];
+NPC ballgrid[1][20];
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
@@ -220,11 +220,13 @@ int main( int argc, char* args[] ) {
         /*Fill the surface white*/
         SDL_FillRect( gScreenSurface, NULL,
 					SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
-
+		
+		/*Moves Player*/
 		if(clicked == 1) movePLAYER(&ball);
+		
 		drawPLAYER(ball);
 		for (i = 0; i < BALLY; i++)
-			for (j = 0; j <= BALLX; j++)
+			for (j = 0; j < BALLX; j++)
 				drawNPC(ballgrid[i][j]);
 
         /*Update the surface*/
@@ -297,8 +299,8 @@ void createGrid(int ballY, int ballX){
 	int i, j;
     SDL_Surface* BallSurface;
 	for (i=0; i<ballY; i++){
-		for (j=0; j<=ballX; j++){
-			BallSurface = (rand()%2)? loadSurface("./Images/blue.tga") : loadSurface("./Images/red.tga");
+		for (j=0; j<ballX; j++){
+			BallSurface = (rand()%2)? loadSurface("./Images/blue.png") : loadSurface("./Images/pink.png");
 			ballgrid[i][j] = createNPC(
 				i*IMAGE_HEIGHT,
 				j*IMAGE_WIDTH,
@@ -353,15 +355,14 @@ int loadMedia() {
     /*uint32_t colorKey;*/
 
     /*Load PNG surface*/
-    /*NAO ESTA IMPORTANDO QUAL COR E COLOCADA AQUI*/
-    gJPGSurface = loadSurface( "./Images/pink.png" );
+    gJPGSurface = rand()%2? loadSurface( "./Images/pink.png" ) : loadSurface( "./Images/blue.png" ) ;
     if( gJPGSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
     }
     else
     {
-        Uint32 colorkey = SDL_MapRGB( gJPGSurface->format, 0, 0xFF, 0 );
+        Uint32 colorkey = SDL_MapRGBA( gJPGSurface->format, 0x00, 0x00, 0x00, 0xFF );
         SDL_SetColorKey( gJPGSurface,1, colorkey );
     }
     return success;
@@ -398,7 +399,7 @@ SDL_Surface* loadSurface( char *path ) {
         }
         else
         {
-            Uint32 colorkey = SDL_MapRGB( optimizedSurface->format, 0, 0xFF, 0 );
+            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0, 0, 0, 0xFF);
             SDL_SetColorKey( optimizedSurface,1, colorkey );
         }
 
