@@ -5,7 +5,7 @@
  *
  * Nome: Eduardo Melo
  * DRE: 117200581
- * 
+ *
  * Nome: Matheus Pinheiro
  * DRE: 117249179
  *
@@ -13,7 +13,7 @@
  * DRE: 117196229
  *
  * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
- * 
+ *
  */
 
 /*Using SDL, SDL_image, standard IO, and strings*/
@@ -32,8 +32,12 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+/*Velocidade da bolha*/
 const int MSPEED = 8;
-const int BALLX = 20;
+
+/*Quantidade de bolhas na primeira linha*/
+const int BALLX = 19;
+const int BALLY = 1;
 
 const int false = 0;
 const int true = 1;
@@ -41,7 +45,8 @@ const int true = 1;
 const int IMAGE_WIDTH = 32;
 const int IMAGE_HEIGHT = 32;
 
-typedef struct _NPC  {
+typedef struct _PLAYER
+{
     float posX;
     float posY;
     float stepX;
@@ -49,17 +54,33 @@ typedef struct _NPC  {
     SDL_Surface* image;
     int imgW;
     int imgH;
+} PLAYER;
+
+typedef struct _NPC
+{
+	float posX;
+    float posY;
+	int indexX;
+	int indexY;
+    int imgW;
+    int imgH;
+    SDL_Surface* image;
 } NPC;
 
 /*
  * Global Variables
  */
 
+int clicked = 0;
+
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
 
-/*The imagem character*/
-NPC ball, ballz[2][20];
+/*The image character*/
+PLAYER ball;
+
+/*Ball Grid*/
+NPC ballgrid[1][19];
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
@@ -83,16 +104,20 @@ void closing();
 /*Loads individual image*/
 SDL_Surface* loadSurface( char *path );
 
+/*Create PLAYER*/
+PLAYER createPLAYER( float posX, float posY, float stepX, float stepY, SDL_Surface *image);
+
 /*Create NPC*/
-NPC createNPC( float posX, float posY, float stepX, float stepY, SDL_Surface *image);
+NPC createNPC(float posY, float posX, int indexY, int indexX, SDL_Surface *image);
 
-/*Move NPC*/
-void moveNPC(NPC *p);
+/*Create grid*/
+void createGrid(int ballY, int ballX);
 
-/*Checks Collision*/
-int checkCollision();
+/*Move PLAYER*/
+void movePLAYER(PLAYER *p);
 
-void draw(NPC p){
+/*Displays player on screen*/
+void drawPLAYER(PLAYER p){
 	SDL_Rect srcRect, dstRect;
 	srcRect.x = 0; srcRect.y = 0;
     srcRect.w = IMAGE_WIDTH;
@@ -102,13 +127,23 @@ void draw(NPC p){
 	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
 }
 
-int clicked = 0;
+/*Displays NPC on screen*/
+void drawNPC(NPC n){
+	SDL_Rect srcRect, dstRect;
+	srcRect.x = 0; srcRect.y = 0;
+    srcRect.w = IMAGE_WIDTH;
+    srcRect.h = IMAGE_HEIGHT;
+    dstRect.x = n.posX;
+    dstRect.y = n.posY;
+	SDL_BlitSurface( n.image, &srcRect, gScreenSurface, &dstRect );
+}
+
 int main( int argc, char* args[] ) {
     SDL_Event e;/*Event handler*/
-    SDL_Surface* balls;/*Ball surface*/
+    SDL_Surface* BallSurface;/*Ball surface*/
     int quit = false;/*Main loop flag*/
     int Mx, My;
-    int i;
+    int i, j;
 
     /*Start up SDL and create window*/
     if( !init() ) {
@@ -121,14 +156,17 @@ int main( int argc, char* args[] ) {
         printf( "Failed to load media!\n" );
         return 2;
     }
-    balls = loadSurface("./Images/blue.tga");
-
-    /*Create NPC*/
-    ball = createNPC(	(SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                        (SCREEN_HEIGHT - IMAGE_HEIGHT),
-                        0,
-                        0,
-                        balls);
+    BallSurface = loadSurface("./Images/pink.png");
+	
+	/*Create Ball Grid*/
+	createGrid(BALLY, BALLX);
+	
+    /*Create PLAYER*/
+    ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
+                     (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                      0,
+                      0,
+                      BallSurface);
 
     /*While application is running*/
     while( !quit ) {
@@ -138,9 +176,7 @@ int main( int argc, char* args[] ) {
                     quit = true;
                     break;
                 case SDL_KEYDOWN:
-                    if (e.key.keysym.sym == SDLK_ESCAPE) {
-                        quit = true;
-                    }
+                    if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
                     break;
 
 			case SDL_MOUSEBUTTONDOWN:
@@ -149,26 +185,32 @@ int main( int argc, char* args[] ) {
 					/*REINTERPRETANDO Mx E My COM ORIGEM NO CENTRO DE BALL*/
 					Mx = Mx - SCREEN_WIDTH/2;
 					My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
-					/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+                    /*CLICK NAO FUNCIONA SE MY < CENTRO DA BOLINHA*/
+					if(My > 0){
+						/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+						ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
+						ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
 
-                    ball.posX = SCREEN_WIDTH/2 - IMAGE_WIDTH/2;
-                    ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+						/* CASO NECESSARIO, SABER QUAL STEPX E STEPY
+						printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
+						printf("%d, %d\n", Mx, My);
+						*/
 
-					ball.stepX = Mx/sqrt(Mx*Mx+My*My);
-					ball.stepY = -(My/sqrt(Mx*Mx+My*My));
+						/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS
+                         * sen 8 = 0.99
+                         * cos 8 = -0.139
+                         */
 
-					/*
-					printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
-					printf("%d, %d\n", Mx, My);
-					*/
-
-					/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS*/
-					if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
-					if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
-					/*AUMENTANDO VELOCIDADE DE BALL*/
-					ball.stepY*= MSPEED;
-					ball.stepX*= MSPEED;
-					clicked = 1;
+						if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
+						if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
+						ball.stepY*= MSPEED;
+						ball.stepX*= MSPEED;
+						clicked = 1;
+						/* P/ TESTAR A BOLINHA IR RETO
+						 * ball.stepX = 0;
+						 * ball.stepY = -8
+						 */
+						}
 				}
 					break;
 
@@ -177,25 +219,13 @@ int main( int argc, char* args[] ) {
 
         /*Fill the surface white*/
         SDL_FillRect( gScreenSurface, NULL,
-                              SDL_MapRGB( gScreenSurface->format,
-                              0xFF, 0xFF, 0xFA ) );
+					SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
 
-		if(clicked == 1) moveNPC(&ball);
-
-        draw(ball);
-        for (i=0; i<BALLX; i++){
-			ballz[0][i] = createNPC(
-						i*IMAGE_WIDTH,
-                        0,
-                        0,
-                        0,
-                        balls);
-			 draw (ballz[0][i]);
-		 }
-
-         for (i=0; i<BALLX-1; i++){
- 			 draw (ballz[1][i]);
- 		 }
+		if(clicked == 1) movePLAYER(&ball);
+		drawPLAYER(ball);
+		for (i = 0; i < BALLY; i++)
+			for (j = 0; j <= BALLX; j++)
+				drawNPC(ballgrid[i][j]);
 
         /*Update the surface*/
         SDL_UpdateWindowSurface( gWindow );
@@ -211,86 +241,33 @@ int main( int argc, char* args[] ) {
 }
 
 
-void moveNPC(NPC *p) {
-    int col;
-    SDL_Surface* balls;/*Ball surface*/
-    balls = loadSurface("./Images/blue.tga");
+void movePLAYER(PLAYER *p) {
 
-    p->posX += p->stepX;
-    p->posY += p->stepY;
-
-	col = checkCollision();
-
-	if (col)
-	{
-		p->posX = (p->posX >= 0)? (IMAGE_WIDTH * col) - (IMAGE_WIDTH/2) : (IMAGE_WIDTH * col) + (IMAGE_WIDTH/2) ;
-		p->stepY = 0;
-        p->stepX = 0;
-        p->posY = IMAGE_HEIGHT - 5;
-
-        if(p->posX < col * IMAGE_WIDTH)
-        {
-            ballz[1][col-1] = createNPC(
-                        (col*IMAGE_WIDTH) - (IMAGE_WIDTH/2),
-                         IMAGE_HEIGHT - 5,
-                         0,
-                         0,
-                         balls);
-        }
-        else
-        {
-            ballz[1][col] = createNPC(
-                        (col*IMAGE_WIDTH) + (IMAGE_WIDTH/2),
-                         IMAGE_HEIGHT - 5,
-                         0,
-                         0,
-                         balls);
-        }
-
-
-        clicked = 0;
-        return;
-	}
-
-    if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
-         (p->posX < 0) ) {
-        p->stepX = -p->stepX;
+    if (clicked == 1){
         p->posX += p->stepX;
-    }
-    if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
-         (p->posY < 0) ) {
-        p->stepY = 0;
-        p->posY = 0;
-        p->stepX = 0;
-    }
+        p->posY += p->stepY;
 
+        if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
+             (p->posX < 0) )
+        {
+            p->stepX = -p->stepX;
+            p->posX += p->stepX;
+        }
+        if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
+             (p->posY < 0) )
+        {
+            p->stepY = 0;
+            p->posY = 0;
+            p->stepX = 0;
+        }
+        
+    }
 }
 
-int checkCollision()
-{
-	int i;
-	float distX, distY, dist;
-	for(i=0; i<BALLX; i++)
-	{
-		distX = ball.posX - ballz[0][i].posX + IMAGE_WIDTH/2;
-		distY = ball.posY - ballz[0][i].posY + IMAGE_HEIGHT/2;
-		dist = sqrt(distX*distX + distY*distY);
-		if (dist <= IMAGE_WIDTH)
-		{
-			/*printf("%d\n", i);*/
-			return i;
-		}
-	}
-	return 0;
-}
-
-
-
-
-/*Create NPC*/
-NPC createNPC( float posX, float posY, float stepX, float stepY,
+/*Create PLAYER*/
+PLAYER createPLAYER( float posX, float posY, float stepX, float stepY,
                SDL_Surface *image) {
-    NPC p;
+    PLAYER p;
 
     p.posX = posX;
     p.posY = posY;
@@ -298,6 +275,39 @@ NPC createNPC( float posX, float posY, float stepX, float stepY,
     p.stepY = stepY;
     p.image = image;
     return p;
+}
+
+/*Create NPC*/
+NPC createNPC(float posY, float posX, int indexY, int indexX,
+				SDL_Surface *image) {
+	NPC n;
+	
+	n.posX = posX;
+    n.posY = posY;
+    n.indexY = indexY;
+    n.indexX = indexX;
+    n.image = image;
+    return n;
+    
+}
+
+/*Create Grid*/				
+void createGrid(int ballY, int ballX){
+	
+	int i, j;
+    SDL_Surface* BallSurface;
+	for (i=0; i<ballY; i++){
+		for (j=0; j<=ballX; j++){
+			BallSurface = (rand()%2)? loadSurface("./Images/blue.tga") : loadSurface("./Images/red.tga");
+			ballgrid[i][j] = createNPC(
+				i*IMAGE_HEIGHT,
+				j*IMAGE_WIDTH,
+				i,
+				j,
+				BallSurface);
+				drawNPC(ballgrid[i][j]);
+			}
+		}
 }
 
 int init() {
@@ -343,7 +353,8 @@ int loadMedia() {
     /*uint32_t colorKey;*/
 
     /*Load PNG surface*/
-    gJPGSurface = loadSurface( "./Images/blue.tga" );
+    /*NAO ESTA IMPORTANDO QUAL COR E COLOCADA AQUI*/
+    gJPGSurface = loadSurface( "./Images/pink.png" );
     if( gJPGSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
