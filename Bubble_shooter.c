@@ -91,6 +91,8 @@ SDL_Surface* gScreenSurface = NULL;
 
 int checkCollision();
 
+int checkAround(int color,int Xindex);
+
 /*
  * function prototypes
  */
@@ -248,6 +250,7 @@ int main( int argc, char* args[] ) {
 		if(clicked == 1) movePLAYER(&ball);
 
 		drawPLAYER(ball);
+
 		for (i = 0; i < BALLY; i++)
 			for (j = 0; j < BALLX; j++)
 				drawNPC(ballgrid[i][j]);
@@ -311,7 +314,7 @@ void movePLAYER(PLAYER *p)
 				                col,
                                 p->color,
 				                p->image);
-				                drawNPC(ballgrid[1][col]);
+			drawNPC(ballgrid[1][col]);
 
             ballcolor = rand()%6+1;
             ball.color = ballcolor;
@@ -332,7 +335,7 @@ void movePLAYER(PLAYER *p)
 				                col-1,
                                 p->color,
 				                p->image);
-				                drawNPC(ballgrid[1][col-1]);
+			drawNPC(ballgrid[1][col-1]);
 
             ballcolor = rand()%6+1;
             ball.color = ballcolor;
@@ -354,7 +357,10 @@ int checkCollision()
             if (dist < IMAGE_WIDTH)
             {
                 /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, i, ballgrid[0][i].color);*/
+				/*The bit where I check if the balls have the same collor and kill them*/
                 if(ball.color == ballgrid[0][i].color){
+					checkAround(ball.color,i);
+					printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][i].color,i);
                     ballgrid[0][i].color = 0;
                     ball.color = 0;
                 }
@@ -539,4 +545,38 @@ SDL_Surface* loadSurface( char *path ) {
     }
 
     return optimizedSurface;
+}
+
+int checkAround(int color,int Xindex)
+{
+	if (Xindex < 2 && Xindex > BALLX-3)
+	{
+		return 0;
+	}
+	else
+	{
+		if (ballgrid[0][Xindex-1].color == color)
+		{
+			if (Xindex - 1 > 0)
+			printf("Left is same\n");
+			/*{
+				checkAround(color, Xindex-1);
+			}*/
+			ballgrid[0][Xindex-1].color = 0;
+
+			return 1;
+		}
+		if (ballgrid[0][Xindex+1].color == color)
+		{
+			printf("Right is same\n");
+			/*if (Xindex + 1 < BALLX)
+			{
+				checkAround(color, Xindex+1);
+			}*/
+			ballgrid[0][Xindex+1].color = 0;
+
+			return 1;
+		}
+	}
+	return 0;
 }
