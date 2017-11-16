@@ -81,7 +81,7 @@ SDL_Window* gWindow = NULL;
 /*The image character*/
 PLAYER ball;
 
-/*Ball Grid*/
+/*Ball Grid [Y][X]*/
 NPC ballgrid[2][20];
 
 SDL_Surface* BallSurface;/*Ball surface*/
@@ -149,6 +149,7 @@ void drawNPC(NPC n){
 
 /*
     COLOR CODES
+    0 = null
     1 = red
     2 = yellow
     3 = green
@@ -307,14 +308,16 @@ void movePLAYER(PLAYER *p)
             p->stepY = 0;
             clicked = 0;
 
+            checkAround(ball.color,col+1);
+
             ballgrid[1][col] = createNPC(
 				                IMAGE_WIDTH - 5,
-                    			col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+                    		col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
 				                1,
 				                col,
-                                p->color,
+                        p->color,
 				                p->image);
-			drawNPC(ballgrid[1][col]);
+			      drawNPC(ballgrid[1][col]);
 
             ballcolor = rand()%6+1;
             ball.color = ballcolor;
@@ -328,14 +331,16 @@ void movePLAYER(PLAYER *p)
             p->stepY = 0;
             clicked = 0;
 
+            checkAround(ball.color,col-1);
+
             ballgrid[1][col-1] = createNPC(
 				                IMAGE_WIDTH - 5,
-                                (col-1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+                        (col-1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
 				                1,
 				                col-1,
-                                p->color,
+                        p->color,
 				                p->image);
-			drawNPC(ballgrid[1][col-1]);
+			      drawNPC(ballgrid[1][col-1]);
 
             ballcolor = rand()%6+1;
             ball.color = ballcolor;
@@ -359,10 +364,8 @@ int checkCollision()
                 /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, i, ballgrid[0][i].color);*/
 				/*The bit where I check if the balls have the same collor and kill them*/
                 if(ball.color == ballgrid[0][i].color){
-					checkAround(ball.color,i);
-					printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][i].color,i);
-                    ballgrid[0][i].color = 0;
-                    ball.color = 0;
+					          checkAround(ball.color,i);
+					          printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][i].color,i);
                 }
                 return i+1;
             }
@@ -436,7 +439,7 @@ void createGrid(int ballY, int ballX){
     /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
 	for (i=0; i<1; i++){
 		for (j=0; j<ballX; j++){
-            ballcolor = rand()%6+1;
+        ballcolor = rand()%6+1;
     		BallSurface = GetColor(ballcolor);
 			ballgrid[i][j] = createNPC(
 				i*IMAGE_HEIGHT,
@@ -549,7 +552,10 @@ SDL_Surface* loadSurface( char *path ) {
 
 int checkAround(int color,int Xindex)
 {
-	if (Xindex < 2 && Xindex > BALLX-3)
+  ballgrid[0][Xindex].color = 0;
+  ball.color = 0;
+
+	if (Xindex < 0 && Xindex > BALLX)
 	{
 		return 0;
 	}
@@ -557,25 +563,21 @@ int checkAround(int color,int Xindex)
 	{
 		if (ballgrid[0][Xindex-1].color == color)
 		{
+      printf("Left is same\n");
 			if (Xindex - 1 > 0)
-			printf("Left is same\n");
-			/*{
+			{
 				checkAround(color, Xindex-1);
-			}*/
+			}
 			ballgrid[0][Xindex-1].color = 0;
-
-			return 1;
 		}
 		if (ballgrid[0][Xindex+1].color == color)
 		{
-			printf("Right is same\n");
-			/*if (Xindex + 1 < BALLX)
+      printf("Right is same\n");
+			if (Xindex + 1 < BALLX)
 			{
 				checkAround(color, Xindex+1);
-			}*/
+			}
 			ballgrid[0][Xindex+1].color = 0;
-
-			return 1;
 		}
 	}
 	return 0;
