@@ -289,9 +289,28 @@ void movePLAYER(PLAYER *p)
         if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
              (p->posY < 0) )
         {
+            col = (int)((p->posX)/IMAGE_WIDTH);
+            if (p->posX > col*IMAGE_WIDTH + IMAGE_WIDTH/2) col++;
+            if ballgrid[]
+            p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
+            p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
             p->stepY = 0;
-            p->posY = 0;
             p->stepX = 0;
+            clicked = 0;
+
+            /*printf("%d\n", col);*/
+            ballgrid[0][col] = createNPC(
+				                0,
+                    		col*IMAGE_WIDTH,
+				                0,
+				                col,
+                        p->color,
+				                p->image);
+			      drawNPC(ballgrid[1][col]);
+
+            ballcolor = rand()%6+1;
+            ball.color = ballcolor;
+            p->image = GetColor(ballcolor);
         }
     }
 
@@ -308,7 +327,7 @@ void movePLAYER(PLAYER *p)
             p->stepY = 0;
             clicked = 0;
 
-            checkAround(ball.color,col+1);
+            /*checkAround(ball.color,col+1);*/
 
             ballgrid[1][col] = createNPC(
 				                IMAGE_WIDTH - 5,
@@ -331,7 +350,7 @@ void movePLAYER(PLAYER *p)
             p->stepY = 0;
             clicked = 0;
 
-            checkAround(ball.color,col-1);
+            /*checkAround(ball.color,col-1);*/
 
             ballgrid[1][col-1] = createNPC(
 				                IMAGE_WIDTH - 5,
