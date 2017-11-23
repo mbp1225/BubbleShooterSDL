@@ -60,13 +60,16 @@ typedef struct _PLAYER
 typedef struct _NPC
 {
 	float posX;
-    float posY;
+  float posY;
 	int indexX;
 	int indexY;
-    int imgW;
-    int imgH;
-    SDL_Surface* image;
-    int color;
+  int imgW;
+  int imgH;
+  SDL_Surface* image;
+  int color;
+  float distX;
+  float distY;
+  float dist;
 } NPC;
 
 /*
@@ -74,6 +77,7 @@ typedef struct _NPC
  */
 
 int clicked = 0;
+int quit = 0;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
@@ -88,10 +92,6 @@ SDL_Surface* BallSurface;/*Ball surface*/
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
-
-int checkCollision();
-
-int checkAround(int color,int Xindex);
 
 /*
  * function prototypes
@@ -121,31 +121,32 @@ void createGrid(int ballY, int ballX);
 /*Move PLAYER*/
 void movePLAYER(PLAYER *p);
 
+/*Gets ball color*/
 SDL_Surface* GetColor(int color);
 
+/*checks ball collision*/
+int checkCollision();
+
+/*checks if the balls around are the same color*/
+int checkAround(int color,int Xindex);
+
+/*Prepares game initialization and variables*/
+int PrepareGame();
+
+/*Prints the screen surface and its updates*/
+void PrintScreen(void);
+
 /*Displays player on screen*/
-void drawPLAYER(PLAYER p){
-	SDL_Rect srcRect, dstRect;
-	srcRect.x = 0; srcRect.y = 0;
-    srcRect.w = IMAGE_WIDTH;
-    srcRect.h = IMAGE_HEIGHT;
-    dstRect.x = p.posX;
-    dstRect.y = p.posY;
-	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
-}
+void drawPLAYER(PLAYER p);
 
 /*Displays NPC on screen*/
-void drawNPC(NPC n){
-    if(n.color){
-    	SDL_Rect srcRect, dstRect;
-    	srcRect.x = 0; srcRect.y = 0;
-        srcRect.w = IMAGE_WIDTH;
-        srcRect.h = IMAGE_HEIGHT;
-        dstRect.x = n.posX;
-        dstRect.y = n.posY;
-    	SDL_BlitSurface( n.image, &srcRect, gScreenSurface, &dstRect );
-    }
-}
+void drawNPC(NPC n);
+
+/*Game Function*/
+void game();
+
+/*Shoot Ball Player*/
+void shoot();
 
 /*
     COLOR CODES
@@ -159,116 +160,23 @@ void drawNPC(NPC n){
 */
 
 int main( int argc, char* args[] ) {
-    SDL_Event e;/*Event handler*/
+    int errortest;
 
-    int quit = false;/*Main loop flag*/
-    int Mx, My;
-    int i, j;
-    int ballcolor;
-
-    /*Start up SDL and create window*/
-    if( !init() ) {
-        printf( "Failed to initialize!\n" );
-        return 1;
+    /*Prepares game initialization and variables*/
+    errortest = PrepareGame();
+    if(errortest){
+      return errortest;
     }
-
-
-    ballcolor = rand()%6+1;
-    BallSurface = GetColor(ballcolor);
-
-    /*Load media*/
-    if( !loadMedia() ) {
-        printf( "Failed to load media!\n" );
-        return 2;
-    }
-
-	/*Create Ball Grid*/
-	createGrid(BALLY, BALLX);
-
-    /*Create PLAYER*/
-
-    ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                     (SCREEN_HEIGHT - IMAGE_HEIGHT),
-                      0,
-                      0,
-                      ballcolor,
-                      BallSurface);
 
     /*While application is running*/
     while( !quit ) {
-        while( SDL_PollEvent( &e ) != 0 ) {
-            switch (e.type) {
-                case SDL_QUIT:
-                    quit = true;
-                    break;
-                case SDL_KEYDOWN:
-                    if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
-                    break;
-
-			case SDL_MOUSEBUTTONDOWN:
-				if (e.button.button == SDL_BUTTON_LEFT && !clicked){
-					SDL_GetMouseState( &Mx, &My );
-					/*REINTERPRETANDO Mx E My COM ORIGEM NO CENTRO DE BALL*/
-					Mx = Mx - SCREEN_WIDTH/2;
-					My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
-                    /*CLICK NAO FUNCIONA SE MY < CENTRO DA BOLINHA*/
-					if(My > 0){
-						/*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
-						ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
-						ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
-
-						/* CASO NECESSARIO, SABER QUAL STEPX E STEPY
-						printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
-						printf("%d, %d\n", Mx, My);
-						*/
-
-						/*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS
-                         * sen 8 = 0.99
-                         * cos 8 = -0.139
-                         */
-
-						if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
-						if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
-						ball.stepY*= MSPEED;
-						ball.stepX*= MSPEED;
-						clicked = 1;
-						/* P/ TESTAR A BOLINHA IR RETO
-						  ball.stepX = 0;
-						  ball.stepY = -8; */
-
-						}
-				}
-					break;
-
-            }
-        }
-
-        /*Fill the surface white*/
-        SDL_FillRect( gScreenSurface, NULL,
-					SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
-
-		/*Moves Player*/
-		if(clicked == 1) movePLAYER(&ball);
-
-		drawPLAYER(ball);
-
-		for (i = 0; i < BALLY; i++)
-			for (j = 0; j < BALLX; j++)
-				drawNPC(ballgrid[i][j]);
-
-        /*Update the surface*/
-        SDL_UpdateWindowSurface( gWindow );
-
-        /* Not so good solution, depends on your computer*/
-        SDL_Delay(5);
+        game();
     }
 
     /*Free resources and closing SDL*/
     closing();
-
     return 0;
 }
-
 
 void movePLAYER(PLAYER *p)
 {
@@ -291,7 +199,6 @@ void movePLAYER(PLAYER *p)
         {
             col = (int)((p->posX)/IMAGE_WIDTH);
             if (p->posX > col*IMAGE_WIDTH + IMAGE_WIDTH/2) col++;
-            if ballgrid[]
             p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
             p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
             p->stepY = 0;
@@ -307,17 +214,12 @@ void movePLAYER(PLAYER *p)
                         p->color,
 				                p->image);
 			      drawNPC(ballgrid[1][col]);
-
-            ballcolor = rand()%6+1;
-            ball.color = ballcolor;
-            p->image = GetColor(ballcolor);
         }
-    }
 
-    col = checkCollision();
+      col = checkCollision();
 
-    if (col && clicked)
-    {
+      if (col)
+      {
         col--;
         if (p->posX > ballgrid[0][col].posX)
         {
@@ -337,10 +239,6 @@ void movePLAYER(PLAYER *p)
                         p->color,
 				                p->image);
 			      drawNPC(ballgrid[1][col]);
-
-            ballcolor = rand()%6+1;
-            ball.color = ballcolor;
-            p->image = GetColor(ballcolor);
         }
         else
         {
@@ -360,36 +258,42 @@ void movePLAYER(PLAYER *p)
                         p->color,
 				                p->image);
 			      drawNPC(ballgrid[1][col-1]);
-
-            ballcolor = rand()%6+1;
-            ball.color = ballcolor;
-            p->image = GetColor(ballcolor);
         }
+
+        ballcolor = rand()%6+1;
+        ball.color = ballcolor;
+        p->image = GetColor(ballcolor);
+      }
     }
 }
 
 int checkCollision()
 {
-    int i;
-    int dist;
+    int i, j;
+    float dist, distX, distY;
 
-    for (i = 0; i < BALLX; i++)
-    {
-        if(ballgrid[0][i].color){
-            dist = sqrt(((ballgrid[0][i].posX -ball.posX) * (ballgrid[0][i].posX -ball.posX)) +
-                        ((ballgrid[0][i].posY -ball.posY) * (ballgrid[0][i].posY -ball.posY)));
-            if (dist < IMAGE_WIDTH)
-            {
-                /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, i, ballgrid[0][i].color);*/
-				/*The bit where I check if the balls have the same collor and kill them*/
-                if(ball.color == ballgrid[0][i].color){
-					          checkAround(ball.color,i);
-					          printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][i].color,i);
-                }
-                return i+1;
-            }
-        }
-    }
+    for(i = 0; i< BALLY; i++)
+      for (j = 0; j < BALLX; j++)
+      {
+          if(ballgrid[i][j].color){
+              distX = (ballgrid[i][j].posX - ball.posX);
+              distY = (ballgrid[i][j].posY -ball.posY);
+              dist = sqrt(pow(distX, 2) + pow(distY, 2));
+              ballgrid[i][j].distX = distX;
+              ballgrid[i][j].distY = distY;
+              ballgrid[i][j].dist = dist;
+              if (dist < IMAGE_WIDTH)
+              {
+                  /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, j, ballgrid[i][j].color);*/
+  				        /*The bit where I check if the balls have the same collor and kill them*/
+                  if(ball.color == ballgrid[0][j].color){
+  					          checkAround(ball.color,j);
+  					          printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][j].color,j);
+                  }
+                  return j+1;
+              }
+          }
+      }
     return 0;
 }
 
@@ -471,6 +375,110 @@ void createGrid(int ballY, int ballX){
 			drawNPC(ballgrid[i][j]);
 			}
 		}
+}
+
+/*Displays player on screen*/
+void drawPLAYER(PLAYER p){
+	SDL_Rect srcRect, dstRect;
+	srcRect.x = 0; srcRect.y = 0;
+    srcRect.w = IMAGE_WIDTH;
+    srcRect.h = IMAGE_HEIGHT;
+    dstRect.x = p.posX;
+    dstRect.y = p.posY;
+	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
+}
+
+/*Displays NPC on screen*/
+void drawNPC(NPC n){
+    if(n.color){
+    	SDL_Rect srcRect, dstRect;
+    	srcRect.x = 0; srcRect.y = 0;
+        srcRect.w = IMAGE_WIDTH;
+        srcRect.h = IMAGE_HEIGHT;
+        dstRect.x = n.posX;
+        dstRect.y = n.posY;
+    	SDL_BlitSurface( n.image, &srcRect, gScreenSurface, &dstRect );
+    }
+}
+
+void PrintScreen(){
+  int i, j;
+
+  /*Fill the surface white*/
+  SDL_FillRect( gScreenSurface, NULL,
+  SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
+
+  /*Moves Player*/
+  if(clicked == 1) movePLAYER(&ball);
+
+  drawPLAYER(ball);
+
+  for (i = 0; i < BALLY; i++)
+  for (j = 0; j < BALLX; j++)
+  drawNPC(ballgrid[i][j]);
+
+  /*Update the surface*/
+  SDL_UpdateWindowSurface( gWindow );
+
+  /* Not so good solution, depends on your computer*/
+  SDL_Delay(5);
+}
+
+
+void shoot(){
+  int Mx, My;
+
+  SDL_GetMouseState( &Mx, &My );
+  /*REINTERPRETANDO Mx E My COM ORIGEM NO CENTRO DE BALL*/
+  Mx = Mx - SCREEN_WIDTH/2;
+  My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
+  /*CLICK NAO FUNCIONA SE MY < CENTRO DA BOLINHA*/
+  if(My > 0){
+    /*REINTERPRETANDO X E Y PARA QUE A HIPOTENUSA SEJA 1 (CALCULANDO O STEP)*/
+    ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
+    ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
+
+    /* CASO NECESSARIO, SABER QUAL STEPX E STEPY
+    printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
+    printf("%d, %d\n", Mx, My);
+    */
+
+    /*CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS
+                 * sen 8 = 0.99
+                 * cos 8 = -0.139
+                 */
+
+    if (ball.stepX > 0.99) { ball.stepX = 0.99; ball.stepY = -0.139; }
+    if (ball.stepX < -0.99) { ball.stepX = -0.99; ball.stepY = -0.139; }
+    ball.stepY*= MSPEED;
+    ball.stepX*= MSPEED;
+    clicked = 1;
+    /* P/ TESTAR A BOLINHA IR RETO
+      ball.stepX = 0;
+      ball.stepY = -8; */
+    }
+}
+
+void game(){
+  SDL_Event e;
+
+  while( SDL_PollEvent(&e) ) {
+    switch (e.type) {
+      case SDL_QUIT:
+          quit = true;
+          break;
+      case SDL_KEYDOWN:
+          if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
+          break;
+      case SDL_MOUSEBUTTONDOWN:
+        if (e.button.button == SDL_BUTTON_LEFT && !clicked){
+          shoot();
+        }
+        break;
+  }
+  /*game(e);*/
+  }
+  PrintScreen();
 }
 
 int init() {
@@ -569,6 +577,40 @@ SDL_Surface* loadSurface( char *path ) {
     return optimizedSurface;
 }
 
+int PrepareGame(){
+  int ballcolor;
+
+  /*Start up SDL and create window*/
+  if( !init() ) {
+      printf( "Failed to initialize!\n" );
+      return 1;
+  }
+
+
+  ballcolor = rand()%6+1;
+  BallSurface = GetColor(ballcolor);
+
+  /*Load media*/
+  if( !loadMedia() ) {
+      printf( "Failed to load media!\n" );
+      return 2;
+  }
+
+/*Create Ball Grid*/
+createGrid(BALLY, BALLX);
+
+  /*Create PLAYER*/
+
+  ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
+                   (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                    0,
+                    0,
+                    ballcolor,
+                    BallSurface);
+
+  return 0;
+}
+
 int checkAround(int color,int Xindex)
 {
   ballgrid[0][Xindex].color = 0;
@@ -587,7 +629,8 @@ int checkAround(int color,int Xindex)
 			{
 				checkAround(color, Xindex-1);
 			}
-			ballgrid[0][Xindex-1].color = 0;
+      ballgrid[0][Xindex-1].color = 0;
+			SDL_FreeSurface( ballgrid[0][Xindex-1].image );
 		}
 		if (ballgrid[0][Xindex+1].color == color)
 		{
@@ -597,6 +640,7 @@ int checkAround(int color,int Xindex)
 				checkAround(color, Xindex+1);
 			}
 			ballgrid[0][Xindex+1].color = 0;
+      SDL_FreeSurface( ballgrid[0][Xindex+1].image );
 		}
 	}
 	return 0;
