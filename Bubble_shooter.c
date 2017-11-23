@@ -25,6 +25,7 @@
 #include <math.h>
 
 /*
+ * sJHDASDOA
  * Constants
  */
 
@@ -57,19 +58,20 @@ typedef struct _PLAYER
     int imgH;
 } PLAYER;
 
-typedef struct _NPC
-{
-	float posX;
-  float posY;
-	int indexX;
-	int indexY;
-  int imgW;
-  int imgH;
-  SDL_Surface* image;
-  int color;
-  float distX;
-  float distY;
-  float dist;
+typedef struct _NPC{
+    float posX;
+    float posY;
+    int indexX;
+    int indexY;
+    int imgW;
+    int imgH;
+    SDL_Surface* image;
+    int color;
+    float distX;
+    float distY;
+    float dist;
+    float centroX;
+    float centroY;
 } NPC;
 
 /*
@@ -134,7 +136,7 @@ int checkAround(int color,int Xindex);
 int PrepareGame();
 
 /*Prints the screen surface and its updates*/
-void PrintScreen(void);
+void RefreshScreen(void);
 
 /*Displays player on screen*/
 void drawPLAYER(PLAYER p);
@@ -207,13 +209,14 @@ void movePLAYER(PLAYER *p)
 
             /*printf("%d\n", col);*/
             ballgrid[0][col] = createNPC(
-				                0,
-                    		col*IMAGE_WIDTH,
-				                0,
-				                col,
-                        p->color,
-				                p->image);
-			      drawNPC(ballgrid[1][col]);
+                0,
+    		    col*IMAGE_WIDTH,
+                0,
+                col,
+                p->color,
+                p->image
+            );
+            drawNPC(ballgrid[1][col]);
         }
 
       col = checkCollision();
@@ -233,7 +236,7 @@ void movePLAYER(PLAYER *p)
 
             ballgrid[1][col] = createNPC(
 				                IMAGE_WIDTH - 5,
-                    		col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+                    		    col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
 				                1,
 				                col,
                         p->color,
@@ -322,6 +325,8 @@ NPC createNPC(float posY, float posX, int indexY, int indexX, int color,
     n.indexX = indexX;
     n.color = color;
     n.image = image;
+    n.centroX = posX+IMAGE_WIDTH/2;
+    n.centroY = posX+IMAGE_HEIGHT/2;
     return n;
 
 }
@@ -401,15 +406,12 @@ void drawNPC(NPC n){
     }
 }
 
-void PrintScreen(){
+void RefreshScreen(){
   int i, j;
 
   /*Fill the surface white*/
   SDL_FillRect( gScreenSurface, NULL,
   SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
-
-  /*Moves Player*/
-  if(clicked == 1) movePLAYER(&ball);
 
   drawPLAYER(ball);
 
@@ -460,25 +462,29 @@ void shoot(){
 }
 
 void game(){
-  SDL_Event e;
+    SDL_Event e;
 
-  while( SDL_PollEvent(&e) ) {
-    switch (e.type) {
-      case SDL_QUIT:
-          quit = true;
-          break;
-      case SDL_KEYDOWN:
-          if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
-          break;
-      case SDL_MOUSEBUTTONDOWN:
-        if (e.button.button == SDL_BUTTON_LEFT && !clicked){
-          shoot();
+    while( SDL_PollEvent(&e) ) {
+        switch (e.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+            case SDL_KEYDOWN:
+                if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                if (e.button.button == SDL_BUTTON_LEFT && !clicked){
+                    shoot();
+                }
+                break;
         }
-        break;
-  }
-  /*game(e);*/
-  }
-  PrintScreen();
+        /*game(e);*/
+    }
+
+    /*Moves Player*/
+    if(clicked == 1) movePLAYER(&ball);
+
+    RefreshScreen();
 }
 
 int init() {
