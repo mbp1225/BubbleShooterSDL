@@ -38,7 +38,7 @@ const int MSPEED = 8;
 
 /*Quantidade de bolhas na primeira linha*/
 const int BALLX = 20;
-const int BALLY = 2;
+const int BALLY = 20;
 
 const int false = 0;
 const int true = 1;
@@ -88,7 +88,7 @@ SDL_Window* gWindow = NULL;
 PLAYER ball;
 
 /*Ball Grid [Y][X]*/
-NPC ballgrid[2][20];
+NPC ballgrid[20][20];
 
 SDL_Surface* BallSurface;/*Ball surface*/
 
@@ -133,7 +133,7 @@ NPC* checkCollision();
 void WallCollision();
 
 /*checks if the balls around are the same color*/
-int checkAround(int color,int Xindex);
+void checkAround(int color, NPC* colNPC);
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -146,6 +146,9 @@ void drawPLAYER(PLAYER p);
 
 /*Displays NPC on screen*/
 void drawNPC(NPC n);
+
+/*Displays Player UI*/
+void drawBACKGROUND();
 
 /*Game Function*/
 void game();
@@ -194,8 +197,10 @@ void movePLAYER(PLAYER *p)
         p->posX += p->stepX;
         p->posY += p->stepY;
 
+        /*Checks if there's any wall collision for it inside the function*/
         WallCollision();
 
+        /*CeilingCollision*/
         if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
              (p->posY < 0) )
         {
@@ -207,7 +212,6 @@ void movePLAYER(PLAYER *p)
             p->stepX = 0;
             clicked = 0;
 
-            /*printf("%d\n", col);*/
             ballgrid[0][col] = createNPC(
                 0,
     		    col*IMAGE_WIDTH,
@@ -237,12 +241,14 @@ void movePLAYER(PLAYER *p)
                 /*checkAround(ball.color,col+1);*/
 
                 ballgrid[(colNPC->indexY) + 1][colNPC->indexX] = createNPC(
-    				                IMAGE_HEIGHT - 5,
+    				                ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
                         		    colNPC->indexX*IMAGE_WIDTH + IMAGE_WIDTH/2,
     				                (colNPC->indexY) + 1,
     				                colNPC->indexX,
                                     p->color,
     				                p->image);
+                                    printf("%d\n", ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5));
+                /*if(ballgrid[(colNPC->indexY) + 1][colNPC->indexX].indexY % 2) ballgrid[(colNPC->indexY) + 1][colNPC->indexX].posX += IMAGE_WIDTH/2;*/
                 drawNPC(ballgrid[(colNPC->indexY) + 1][colNPC->indexX]);
             }
             else
@@ -256,12 +262,14 @@ void movePLAYER(PLAYER *p)
                 /*checkAround(ball.color,col-1);*/
 
                 ballgrid[colNPC->indexY+1][(colNPC->indexX) - 1] = createNPC(
-    				                IMAGE_WIDTH - 5,
-                                    ((colNPC->indexX) - 1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+    				                ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
+                                    ((colNPC->indexX) - 1)*IMAGE_WIDTH + IMAGE_WIDTH/2,
     				                (colNPC->indexY) + 1,
     				                (colNPC->indexX) - 1,
                                     p->color,
     				                p->image);
+                                    printf("%d\n", ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5));
+                /*if(ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1].indexY % 2) ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1].posX += IMAGE_WIDTH/2;*/
                 drawNPC(ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1]);
             }
             ballcolor = rand()%6+1;
@@ -290,7 +298,7 @@ NPC* checkCollision()
       {
           if(ballgrid[i][j].color){
               distX = (ballgrid[i][j].posX - ball.posX);
-              distY = (ballgrid[i][j].posY -ball.posY);
+              distY = (ballgrid[i][j].posY - ball.posY);
               dist = sqrt(pow(distX, 2) + pow(distY, 2));
               ballgrid[i][j].distX = distX;
               ballgrid[i][j].distY = distY;
@@ -298,10 +306,10 @@ NPC* checkCollision()
               if (dist < IMAGE_WIDTH-10)
               {
                   /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, j, ballgrid[i][j].color);*/
-  				        /*The bit where I check if the balls have the same collor and kill them*/
-                  if(ball.color == ballgrid[0][j].color){
-                      checkAround(ball.color,j);
-                      printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][j].color,j);
+  				 /*The bit where I check if the balls have the same collor and kill them*/
+                  if(ball.color == ballgrid[i][j].color){
+                      checkAround(ball.color, &ballgrid[i][j]);
+                      printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j);
                   }
                   return &ballgrid[i][j];
               }
@@ -403,6 +411,18 @@ void drawPLAYER(PLAYER p){
 	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
 }
 
+void drawBACKGROUND(){
+    SDL_Surface* PUI;
+    SDL_Rect srcRect, dstRect;
+    PUI = loadSurface( "./Images/bg.png" );
+	srcRect.x = 0; srcRect.y = 0;
+    srcRect.w = SCREEN_WIDTH;
+    srcRect.h = SCREEN_HEIGHT;
+    dstRect.x = 0;
+    dstRect.y = 0;
+	SDL_BlitSurface( PUI, &srcRect, gScreenSurface, &dstRect );
+}
+
 /*Displays NPC on screen*/
 void drawNPC(NPC n){
     if(n.color){
@@ -420,8 +440,11 @@ void RefreshScreen(){
   int i, j;
 
   /*Fill the surface white*/
+
   SDL_FillRect( gScreenSurface, NULL,
   SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
+
+  drawBACKGROUND();
 
   drawPLAYER(ball);
 
@@ -627,37 +650,37 @@ createGrid(BALLY, BALLX);
   return 0;
 }
 
-int checkAround(int color,int Xindex)
+void checkAround(int color, NPC* colNPC)
 {
-  ballgrid[0][Xindex].color = 0;
+  ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
   ball.color = 0;
 
-	if (Xindex < 0 && Xindex > BALLX)
+	if (colNPC->indexX < 0 && colNPC->indexX > BALLX)
 	{
-		return 0;
+		return ;
 	}
 	else
 	{
-		if (ballgrid[0][Xindex-1].color == color)
+		if (ballgrid[colNPC->indexY][(colNPC->indexX)-1].color == color)
 		{
             printf("Left is same\n");
-			if (Xindex - 1 > 0)
+			if ((colNPC->indexX) - 1 > 0)
 			{
-				checkAround(color, Xindex-1);
+				checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)-1]);
 			}
-            ballgrid[0][Xindex-1].color = 0;
-	        SDL_FreeSurface( ballgrid[0][Xindex-1].image );
+            /*ballgrid[0][Xindex-1].color = 0;*/
+	        SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)-1].image );
 		}
-		if (ballgrid[0][Xindex+1].color == color)
+		if (ballgrid[colNPC->indexY][(colNPC->indexX)+1].color == color)
 		{
             printf("Right is same\n");
-			if (Xindex + 1 < BALLX)
+			if ((colNPC->indexX) + 1 < BALLX)
 			{
-				checkAround(color, Xindex+1);
+				checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)+1]);
 			}
-			ballgrid[0][Xindex+1].color = 0;
-            SDL_FreeSurface( ballgrid[0][Xindex+1].image );
+			/*ballgrid[0][Xindex+1].color = 0;*/
+            SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)+1].image );
 		}
 	}
-	return 0;
+	return ;
 }
