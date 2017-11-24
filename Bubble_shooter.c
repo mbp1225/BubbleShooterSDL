@@ -127,7 +127,10 @@ void movePLAYER(PLAYER *p);
 SDL_Surface* GetColor(int color);
 
 /*checks ball collision*/
-int checkCollision();
+NPC* checkCollision();
+
+/*checks ball collision against the wall*/
+void WallCollision();
 
 /*checks if the balls around are the same color*/
 int checkAround(int color,int Xindex);
@@ -184,18 +187,15 @@ void movePLAYER(PLAYER *p)
 {
     int ballcolor;
     int col;
+    NPC *colNPC;
 
     if (clicked)
     {
         p->posX += p->stepX;
         p->posY += p->stepY;
 
-        if ( (p->posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
-             (p->posX < 0) )
-        {
-            p->stepX = -p->stepX;
-            p->posX += p->stepX;
-        }
+        WallCollision();
+
         if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
              (p->posY < 0) )
         {
@@ -217,60 +217,70 @@ void movePLAYER(PLAYER *p)
                 p->image
             );
             drawNPC(ballgrid[1][col]);
+            ballcolor = rand()%6+1;
+            ball.color = ballcolor;
+            p->image = GetColor(ballcolor);
         }
 
-      col = checkCollision();
+        colNPC = checkCollision();
 
-      if (col)
-      {
-        col--;
-        if (p->posX > ballgrid[0][col].posX)
-        {
-            p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-            p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-            p->stepX = 0;
-            p->stepY = 0;
-            clicked = 0;
+          if (colNPC)
+          {
+            if (p->posX > ballgrid[0][colNPC->indexX].posX)
+            {
+                p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
+                p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+                p->stepX = 0;
+                p->stepY = 0;
+                clicked = 0;
 
-            /*checkAround(ball.color,col+1);*/
+                /*checkAround(ball.color,col+1);*/
 
-            ballgrid[1][col] = createNPC(
-				                IMAGE_WIDTH - 5,
-                    		    col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
-				                1,
-				                col,
-                                p->color,
-				                p->image);
-			      drawNPC(ballgrid[1][col]);
+                ballgrid[1][colNPC->indexX] = createNPC(
+    				                IMAGE_WIDTH - 5,
+                        		    colNPC->indexX*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+    				                1,
+    				                colNPC->indexX,
+                                    p->color,
+    				                p->image);
+    			      drawNPC(ballgrid[1][colNPC->indexX]);
+            }
+            else
+            {
+                p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
+                p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+                p->stepX = 0;
+                p->stepY = 0;
+                clicked = 0;
+
+                /*checkAround(ball.color,col-1);*/
+
+                ballgrid[1][(colNPC->indexX) - 1] = createNPC(
+    				                IMAGE_WIDTH - 5,
+                                    ((colNPC->indexX) - 1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
+    				                1,
+    				                (colNPC->indexX) - 1,
+                                    p->color,
+    				                p->image);
+                drawNPC(ballgrid[1][(colNPC->indexX) - 1]);
+            }
+            ballcolor = rand()%6+1;
+            ball.color = ballcolor;
+            p->image = GetColor(ballcolor);
         }
-        else
-        {
-            p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-            p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-            p->stepX = 0;
-            p->stepY = 0;
-            clicked = 0;
-
-            /*checkAround(ball.color,col-1);*/
-
-            ballgrid[1][col-1] = createNPC(
-				                IMAGE_WIDTH - 5,
-                        (col-1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
-				                1,
-				                col-1,
-                        p->color,
-				                p->image);
-			      drawNPC(ballgrid[1][col-1]);
-        }
-
-        ballcolor = rand()%6+1;
-        ball.color = ballcolor;
-        p->image = GetColor(ballcolor);
-      }
     }
 }
 
-int checkCollision()
+void WallCollision(){
+    if ( (ball.posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
+         (ball.posX < 0) )
+    {
+        ball.stepX = -ball.stepX;
+        ball.posX += ball.stepX;
+    }
+}
+
+NPC* checkCollision()
 {
     int i, j;
     float dist, distX, distY;
@@ -285,19 +295,19 @@ int checkCollision()
               ballgrid[i][j].distX = distX;
               ballgrid[i][j].distY = distY;
               ballgrid[i][j].dist = dist;
-              if (dist < IMAGE_WIDTH)
+              if (dist < IMAGE_WIDTH-10)
               {
                   /*printf("ballcolor = %d\nballgrid %d color = %d\n", ball.color, j, ballgrid[i][j].color);*/
   				        /*The bit where I check if the balls have the same collor and kill them*/
                   if(ball.color == ballgrid[0][j].color){
-  					          checkAround(ball.color,j);
-  					          printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][j].color,j);
+                      checkAround(ball.color,j);
+                      printf("Ball color: %d\nBall Index: %d\n",ballgrid[0][j].color,j);
                   }
-                  return j+1;
+                  return &ballgrid[i][j];
               }
           }
       }
-    return 0;
+    return NULL;
 }
 
 /*Create PLAYER*/
