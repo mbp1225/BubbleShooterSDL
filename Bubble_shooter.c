@@ -239,7 +239,7 @@ void movePLAYER(PLAYER *p)
                     		    col*IMAGE_HEIGHT + IMAGE_WIDTH/2,
 				                1,
 				                col,
-                        p->color,
+                                p->color,
 				                p->image);
 			      drawNPC(ballgrid[1][col]);
         }
@@ -416,8 +416,8 @@ void RefreshScreen(){
   drawPLAYER(ball);
 
   for (i = 0; i < BALLY; i++)
-  for (j = 0; j < BALLX; j++)
-  drawNPC(ballgrid[i][j]);
+    for (j = 0; j < BALLX; j++)
+        drawNPC(ballgrid[i][j]);
 
   /*Update the surface*/
   SDL_UpdateWindowSurface( gWindow );
@@ -482,7 +482,7 @@ void game(){
     }
 
     /*Moves Player*/
-    if(clicked == 1) movePLAYER(&ball);
+    if(clicked) movePLAYER(&ball);
 
     RefreshScreen();
 }
@@ -630,23 +630,23 @@ int checkAround(int color,int Xindex)
 	{
 		if (ballgrid[0][Xindex-1].color == color)
 		{
-      printf("Left is same\n");
+            printf("Left is same\n");
 			if (Xindex - 1 > 0)
 			{
 				checkAround(color, Xindex-1);
 			}
-      ballgrid[0][Xindex-1].color = 0;
-			SDL_FreeSurface( ballgrid[0][Xindex-1].image );
+            ballgrid[0][Xindex-1].color = 0;
+	        SDL_FreeSurface( ballgrid[0][Xindex-1].image );
 		}
 		if (ballgrid[0][Xindex+1].color == color)
 		{
-      printf("Right is same\n");
+            printf("Right is same\n");
 			if (Xindex + 1 < BALLX)
 			{
 				checkAround(color, Xindex+1);
 			}
 			ballgrid[0][Xindex+1].color = 0;
-      SDL_FreeSurface( ballgrid[0][Xindex+1].image );
+            SDL_FreeSurface( ballgrid[0][Xindex+1].image );
 		}
 	}
 	return 0;
