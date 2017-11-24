@@ -226,7 +226,7 @@ void movePLAYER(PLAYER *p)
 
           if (colNPC)
           {
-            if (p->posX > ballgrid[0][colNPC->indexX].posX)
+            if (p->posX > ballgrid[colNPC->indexY][colNPC->indexX].posX)
             {
                 p->posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
                 p->posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
@@ -236,14 +236,14 @@ void movePLAYER(PLAYER *p)
 
                 /*checkAround(ball.color,col+1);*/
 
-                ballgrid[1][colNPC->indexX] = createNPC(
-    				                IMAGE_WIDTH - 5,
-                        		    colNPC->indexX*IMAGE_HEIGHT + IMAGE_WIDTH/2,
-    				                1,
+                ballgrid[(colNPC->indexY) + 1][colNPC->indexX] = createNPC(
+    				                IMAGE_HEIGHT - 5,
+                        		    colNPC->indexX*IMAGE_WIDTH + IMAGE_WIDTH/2,
+    				                (colNPC->indexY) + 1,
     				                colNPC->indexX,
                                     p->color,
     				                p->image);
-    			      drawNPC(ballgrid[1][colNPC->indexX]);
+                drawNPC(ballgrid[(colNPC->indexY) + 1][colNPC->indexX]);
             }
             else
             {
@@ -255,14 +255,14 @@ void movePLAYER(PLAYER *p)
 
                 /*checkAround(ball.color,col-1);*/
 
-                ballgrid[1][(colNPC->indexX) - 1] = createNPC(
+                ballgrid[colNPC->indexY+1][(colNPC->indexX) - 1] = createNPC(
     				                IMAGE_WIDTH - 5,
                                     ((colNPC->indexX) - 1)*IMAGE_HEIGHT + IMAGE_WIDTH/2,
-    				                1,
+    				                (colNPC->indexY) + 1,
     				                (colNPC->indexX) - 1,
                                     p->color,
     				                p->image);
-                drawNPC(ballgrid[1][(colNPC->indexX) - 1]);
+                drawNPC(ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1]);
             }
             ballcolor = rand()%6+1;
             ball.color = ballcolor;
