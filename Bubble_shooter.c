@@ -95,6 +95,8 @@ SDL_Surface* BallSurface;/*Ball surface*/
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
 
+SDL_Surface* PUI = NULL;
+
 /*
  * function prototypes
  */
@@ -202,7 +204,7 @@ void movePLAYER(PLAYER *p)
 
         /*CeilingCollision*/
         if ( (p->posY + IMAGE_HEIGHT > SCREEN_HEIGHT) ||
-             (p->posY < 0) )
+             (p->posY < 24) )
         {
             col = (int)((p->posX)/IMAGE_WIDTH);
             if (p->posX > col*IMAGE_WIDTH + IMAGE_WIDTH/2) col++;
@@ -213,8 +215,8 @@ void movePLAYER(PLAYER *p)
             clicked = 0;
 
             ballgrid[0][col] = createNPC(
-                0,
-    		    col*IMAGE_WIDTH,
+                24,
+				col*IMAGE_WIDTH-12,
                 0,
                 col,
                 p->color,
@@ -241,8 +243,10 @@ void movePLAYER(PLAYER *p)
                 /*checkAround(ball.color,col+1);*/
 
                 ballgrid[(colNPC->indexY) + 1][colNPC->indexX] = createNPC(
-    				                ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
-                        		    colNPC->indexX*IMAGE_WIDTH + IMAGE_WIDTH/2,
+                                    ((colNPC->indexY) + 1)*IMAGE_HEIGHT+24,
+                                    (colNPC->indexX)*IMAGE_WIDTH+24+16,
+    				                /*((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
+                        		    colNPC->indexX*IMAGE_WIDTH + IMAGE_WIDTH/2,*/
     				                (colNPC->indexY) + 1,
     				                colNPC->indexX,
                                     p->color,
@@ -262,8 +266,10 @@ void movePLAYER(PLAYER *p)
                 /*checkAround(ball.color,col-1);*/
 
                 ballgrid[colNPC->indexY+1][(colNPC->indexX) - 1] = createNPC(
-    				                ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
-                                    ((colNPC->indexX) - 1)*IMAGE_WIDTH + IMAGE_WIDTH/2,
+                                    ((colNPC->indexY) + 1)*IMAGE_HEIGHT+24,
+                                    ((colNPC->indexX) - 1)*IMAGE_WIDTH+24+16,
+    				                /*((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
+                                    ((colNPC->indexX) - 1)*IMAGE_WIDTH + IMAGE_WIDTH/2,*/
     				                (colNPC->indexY) + 1,
     				                (colNPC->indexX) - 1,
                                     p->color,
@@ -280,8 +286,8 @@ void movePLAYER(PLAYER *p)
 }
 
 void WallCollision(){
-    if ( (ball.posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
-         (ball.posX < 0) )
+    if ( (ball.posX + IMAGE_WIDTH > SCREEN_WIDTH - 24) ||
+         (ball.posX < 24) )
     {
         ball.stepX = -ball.stepX;
         ball.posX += ball.stepX;
@@ -384,12 +390,12 @@ void createGrid(int ballY, int ballX){
 
     /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
 	for (i=0; i<1; i++){
-		for (j=0; j<ballX; j++){
+		for (j=1; j<ballX-1; j++){
         ballcolor = rand()%6+1;
     		BallSurface = GetColor(ballcolor);
 			ballgrid[i][j] = createNPC(
-				i*IMAGE_HEIGHT,
-				j*IMAGE_WIDTH,
+				i*IMAGE_HEIGHT+24,
+				j*IMAGE_WIDTH-12+(IMAGE_WIDTH/2*i%2),
 				i,
 				j,
                 ballcolor,
@@ -412,15 +418,7 @@ void drawPLAYER(PLAYER p){
 }
 
 void drawBACKGROUND(){
-    SDL_Surface* PUI;
-    SDL_Rect srcRect, dstRect;
-    PUI = loadSurface( "./Images/bg.png" );
-	srcRect.x = 0; srcRect.y = 0;
-    srcRect.w = SCREEN_WIDTH;
-    srcRect.h = SCREEN_HEIGHT;
-    dstRect.x = 0;
-    dstRect.y = 0;
-	SDL_BlitSurface( PUI, &srcRect, gScreenSurface, &dstRect );
+	SDL_BlitSurface( PUI, NULL, gScreenSurface, NULL );
 }
 
 /*Displays NPC on screen*/
@@ -456,7 +454,7 @@ void RefreshScreen(){
   SDL_UpdateWindowSurface( gWindow );
 
   /* Not so good solution, depends on your computer*/
-  SDL_Delay(5);
+  /*SDL_Delay();*/
 }
 
 
@@ -561,6 +559,8 @@ int loadMedia() {
     /*Loading success flag*/
     int success = true;
     /*uint32_t colorKey;*/
+
+    PUI = loadSurface( "./Images/bg.png" );
 
     if( BallSurface == NULL) {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
