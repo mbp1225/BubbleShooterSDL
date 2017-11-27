@@ -33,7 +33,7 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 /*Velocidade da bolha*/
-const int MSPEED = 8;
+const int MSPEED = 12;
 
 /*Quantidade de bolhas na primeira linha*/
 const int BALLX = 20;
@@ -165,6 +165,9 @@ int PrepareGame();
 /*Prints the screen surface and its updates*/
 void RefreshScreen(void);
 
+/*Prints grid in the terminal*/
+void printGrid();
+
 /*Displays player on screen*/
 void drawPLAYER(PLAYER p);
 
@@ -182,20 +185,20 @@ void shoot();
 
 
 
-int main( int argc, char* args[] ) 
+int main( int argc, char* args[] )
 {
     int errortest;
 
     /*Prepares game initialization and variables*/
     errortest = PrepareGame();
-    
+
     if(errortest)
     {
       return errortest;
     }
 
     /*While application is running*/
-    while( !quit ) 
+    while( !quit )
     {
         game();
     }
@@ -259,7 +262,7 @@ void CeilingCollision()
           ball.color,
           ball.image
       );
-      
+
       drawNPC(ballgrid[1][newX]);
       ballcolor = rand() % 6 + 1;
       ball.color = ballcolor;
@@ -284,7 +287,7 @@ NPC* checkCollision()
               ballgrid[i][j].distX = distX;
               ballgrid[i][j].distY = distY;
               ballgrid[i][j].dist = dist;
-              if (dist < IMAGE_WIDTH - 4)
+              if (dist < IMAGE_WIDTH - 8)
               {
                   if(ball.color == ballgrid[i][j].color){
                       /*
@@ -302,25 +305,27 @@ NPC* checkCollision()
                   */
                   if (ball.centerX > ballgrid[i][j].centerX)
                   {
-                    if (ball.centerY < IMAGE_HEIGHT/3 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 1;
+                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 1;
                     else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 3;
                     else ballgrid[i][j].coltype = 2;
                   }
-                  
+
                   else
-                  {  
-                    if (ball.centerY < IMAGE_HEIGHT/3 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 6;
+                  {
+                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 6;
                     else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 4;
                     else ballgrid[i][j].coltype = 5;
                   }
-                  
+
+
+                  if (ballgrid[i][j].coltype == 1 || ballgrid[i][j].coltype == 6) return NULL;
                   printf("coltype = %d\n", ballgrid[i][j].coltype);
                   printf("player center: %f ballij center: %f\n", ball.centerX, ballgrid[i][j].centerX);
                   return &ballgrid[i][j];
               }
           }
       }
-      
+
     return NULL;
 }
 
@@ -357,77 +362,92 @@ void NPCCollision()
 				ball.color,
 				ball.image
 			  );
-			  
+
 			  if (!(ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].indexY)%2)
 				ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
 			  break;
-			  case 2:
+        */
+            case 2:
 			  ballgrid[(colNPC->indexY)][(colNPC->indexX)+1] = createNPC(
 				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH,
+				colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH,
 				(colNPC->indexY),
 				((colNPC->indexX)+1),
 				ball.color,
 				ball.image
 			  );
-			  if (!(ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].indexY)%2)
-				ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
-			  break;*/
+              if (colNPC->indexY%2==1) ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
+              break;
+            case 3: /*certo*/
+                if (colNPC->indexY%2 == 0){
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
+                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
+                        colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH/2,
+                        ((colNPC->indexY)+1),
+                        ((colNPC->indexX)),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                else{
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1] = createNPC(
+                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
+                        (colNPC->indexX) * IMAGE_WIDTH + IMAGE_WIDTH,
+                        ((colNPC->indexY)+1),
+                        ((colNPC->indexX)+1),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
+                printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
+                printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
+                break;
 			case 4: /*certo*/
-			  ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1] = createNPC(
-					((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-					colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH/2,
-					((colNPC->indexY)+1),
-					((colNPC->indexX)-1),
-					ball.color,
-					ball.image
-			  );
-			  
-			  if ((ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY) % 2 == 0)
-			  {
-				  ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-				  ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].centerX += IMAGE_WIDTH/2;
-				  ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexX++;
-			  }
-			  
-			  printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-			  printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexX, 
-																   ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY);
-			  printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY) % 2);
-			  /*CreateNPC Parameters*/
-			  /*NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image);*/
-			  /*if (colNPC->indexY) ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posX += IMAGE_WIDTH;*/
+                if (colNPC->indexY%2 == 0){
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1] = createNPC(
+                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
+                        colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH/2,
+                        ((colNPC->indexY)+1),
+                        ((colNPC->indexX)-1),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                else{
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
+                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
+                        (colNPC->indexX) * IMAGE_WIDTH,
+                        ((colNPC->indexY)+1),
+                        ((colNPC->indexX)),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
+                printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
+                printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
 			  break;
-			case 3: /*certo*/
-			  ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
-				((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH/2,
-				((colNPC->indexY)+1),
-				((colNPC->indexX)),
-				ball.color,
-				ball.image
-			  );
-			  if ((ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2==0){
-				ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX += IMAGE_WIDTH/2;
-				ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX += IMAGE_WIDTH/2;
-				ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX++;
-			  }
-			  printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-			  printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
-			  printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);
-			  break;
-			/*case 5:
-			  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1] = createNPC(
-				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH,
-				(colNPC->indexY),
-				((colNPC->indexX)-1),
-				ball.color,
-				ball.image
-			  );
-			  if (!(ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2)
-				ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-			  break;
+            case 5:
+  			  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1] = createNPC(
+  				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
+  				colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH,
+  				(colNPC->indexY),
+  				((colNPC->indexX)-1),
+  				ball.color,
+  				ball.image
+  			  );
+              if (colNPC->indexY%2==1) ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
+                break;
+                /*
+                if ((ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2==1)
+                  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
+              printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
+              printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexX, ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY);
+              printf("que = %d\n", (ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2);
+                  break;
+            */
+            /*
 			case 6:
 			  ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1] = createNPC(
 				((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
@@ -445,6 +465,7 @@ void NPCCollision()
 		ballcolor = rand() % 6 + 1;
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
+        printGrid();
 	}
 }
 
@@ -472,7 +493,7 @@ void NPCCollision()
           /*if(ballgrid[(colNPC->indexY) + 1][colNPC->indexX].indexY % 2) ballgrid[(colNPC->indexY) + 1][colNPC->indexX].posX += IMAGE_WIDTH/2;*/
           /*drawNPC(ballgrid[(colNPC->indexY) + 1][colNPC->indexX]);
       }
-     
+
       else
       {
           ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
@@ -503,9 +524,9 @@ void NPCCollision()
 }*/
 
 /*Create PLAYER*/
-PLAYER createPLAYER( float posX, float posY, 
-					 float stepX, float stepY, 
-					 int color, SDL_Surface *image) 
+PLAYER createPLAYER( float posX, float posY,
+					 float stepX, float stepY,
+					 int color, SDL_Surface *image)
 {
     PLAYER p;
 
@@ -521,9 +542,9 @@ PLAYER createPLAYER( float posX, float posY,
 }
 
 /*Create NPC*/
-NPC createNPC(float posY, float posX, 
-			  int indexY, int indexX, 
-			  int color, SDL_Surface *image) 
+NPC createNPC(float posY, float posX,
+			  int indexY, int indexX,
+			  int color, SDL_Surface *image)
 {
 	NPC n;
 
@@ -536,7 +557,7 @@ NPC createNPC(float posY, float posX,
 	n.centerX = posX + IMAGE_WIDTH/2;
 	n.centerY = posY + IMAGE_HEIGHT/2;
 	n.coltype = 0;
-	
+
 	return n;
 
 }
@@ -611,7 +632,7 @@ void createGrid(int ballY, int ballX)
                 ballcolor,
 				BallSurface
             );
-            
+
 			drawNPC(ballgrid[i][j]);
 		}
 	}
@@ -621,7 +642,7 @@ void createGrid(int ballY, int ballX)
 void drawPLAYER(PLAYER p)
 {
 	SDL_Rect srcRect, dstRect;
-	srcRect.x = 0; 
+	srcRect.x = 0;
 	srcRect.y = 0;
 	srcRect.w = IMAGE_WIDTH;
 	srcRect.h = IMAGE_HEIGHT;
@@ -633,7 +654,7 @@ void drawPLAYER(PLAYER p)
 void drawBACKGROUND(BACKGROUND b)
 {
 	SDL_Rect srcRect, dstRect;
-	srcRect.x = 0; 
+	srcRect.x = 0;
 	srcRect.y = 0;
 	srcRect.w = SCREEN_WIDTH;
 	srcRect.h = SCREEN_HEIGHT;
@@ -689,10 +710,8 @@ void shoot(){
   /*Reinterpretando Mx e My com origem no centro de ball*/
   Mx = Mx - SCREEN_WIDTH/2;
   My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
-  printf("%d\n", Mx);
-  printf("%d\n", My);
   /*Click nao funciona se My < centro da bolinha*/
-  
+
 	if(My > 0)
 	{
 		/*Reinterpretando x e y para que a hipotenusa seja 1 (calculando o step)*/
@@ -710,18 +729,18 @@ void shoot(){
 		 * cos 8 = -0.139
 		 */
 
-		if (ball.stepX > 0.99) 
-		{ 
-			ball.stepX = 0.99; 
-			ball.stepY = -0.139; 
+		if (ball.stepX > 0.99)
+		{
+			ball.stepX = 0.99;
+			ball.stepY = -0.139;
 		}
-		
-		if (ball.stepX < -0.99) 
-		{ 
-			ball.stepX = -0.99; 
-			ball.stepY = -0.139; 
+
+		if (ball.stepX < -0.99)
+		{
+			ball.stepX = -0.99;
+			ball.stepY = -0.139;
 		}
-		
+
 		ball.stepY*= MSPEED;
 		ball.stepX*= MSPEED;
 		clicked = 1;
@@ -736,9 +755,9 @@ void game(){
     /*Por enquanto, este é o play(){*/
     SDL_Event e;
 
-    while( SDL_PollEvent(&e) ) 
+    while( SDL_PollEvent(&e) )
     {
-        switch (e.type) 
+        switch (e.type)
         {
             case SDL_QUIT:
                 quit = true;
@@ -760,12 +779,12 @@ void game(){
 		repositioning();
 		checkAround();
 	}
-	* 
+	*
     if (!health){
 		newline();
         health = 5;
     }
-      
+
     newball();*/
     }
 
@@ -779,33 +798,33 @@ int init() {
     srand(time(NULL));
 
     /*Initialize SDL*/
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) 
+    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
         printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         success = false;
     }
-    else 
+    else
     {
         /*Create window*/ /*##Trocar o nome*/
-        gWindow = SDL_CreateWindow( "Pelo menos o Catarina tem que tirar 1.5", SDL_WINDOWPOS_UNDEFINED, 
+        gWindow = SDL_CreateWindow( "Pelo menos o Catarina tem que tirar 1.5", SDL_WINDOWPOS_UNDEFINED,
 									SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-        if( gWindow == NULL ) 
+        if( gWindow == NULL )
         {
             printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
             success = false;
         }
-        
-        else 
+
+        else
         {
             /*Initialize JPG and PNG loading */
             int imgFlags = IMG_INIT_JPG | IMG_INIT_PNG;
-            if( !( IMG_Init( imgFlags ) & imgFlags ) ) 
+            if( !( IMG_Init( imgFlags ) & imgFlags ) )
             {
                 printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
                 success = false;
             }
-            
-            else 
+
+            else
             {
                 /*Get window surface*/
                 gScreenSurface = SDL_GetWindowSurface( gWindow );
@@ -818,18 +837,18 @@ int init() {
     return success;
 }
 
-int loadMedia() 
+int loadMedia()
 {
     /*Loading success flag*/
     int success = true;
     /*uint32_t colorKey;*/
 
-    if( BallSurface == NULL) 
+    if( BallSurface == NULL)
     {
         printf( "Failed to load image! SDL Error: %s\n", SDL_GetError() );
         success = false;
     }
-    
+
     else
     {
         Uint32 colorkey = SDL_MapRGBA( BallSurface->format, 0x00, 0x00, 0x00, 0xFF );
@@ -838,7 +857,7 @@ int loadMedia()
     return success;
 }
 
-void closing() 
+void closing()
 {
     /*Free loaded image*/
     SDL_FreeSurface( BallSurface );
@@ -853,27 +872,27 @@ void closing()
     SDL_Quit();
 }
 
-SDL_Surface* loadSurface( char *path ) 
+SDL_Surface* loadSurface( char *path )
 {
     /*The final optimized image*/
     SDL_Surface* optimizedSurface = NULL;
 
     /*Load image at specified path*/
     SDL_Surface* loadedSurface = IMG_Load( path );
-    if( loadedSurface == NULL ) 
+    if( loadedSurface == NULL )
     {
         printf( "Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError() );
     }
-    
-    else 
+
+    else
     {
         /*Convert surface to screen format*/
         optimizedSurface = SDL_ConvertSurface( loadedSurface, gScreenSurface->format, 0 );
-        if( optimizedSurface == NULL ) 
+        if( optimizedSurface == NULL )
         {
             printf( "Unable to optimize image %s! SDL Error: %s\n", path, SDL_GetError() );
         }
-        
+
         else
         {
             Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0, 0, 0, 0xFF);
@@ -892,7 +911,7 @@ int PrepareGame()
   int ballcolor;
 
   /*Start up SDL and create window*/
-  if( !init() ) 
+  if( !init() )
   {
       printf( "Failed to initialize!\n" );
       return 1;
@@ -925,6 +944,17 @@ int PrepareGame()
                     BallSurface);
 
   return 0;
+}
+
+void printGrid(){
+    int i, j;
+    for(i=0; i<20; i++){
+        for(j=0; j<20; j++){
+            if(i%2==0) printf("%d ", ballgrid[i][j].color);
+            else printf(" %d", ballgrid[i][j].color);
+        }
+        printf("\n");
+    }
 }
 
 void checkAround(int color, NPC* colNPC)
