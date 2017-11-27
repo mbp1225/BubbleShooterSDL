@@ -277,8 +277,8 @@ NPC* checkCollision()
       {
           if(ballgrid[i][j].color){
 
-              distX = ballgrid[i][j].posX + IMAGE_WIDTH/2 - (ball.posX + IMAGE_WIDTH/2);
-              distY = ballgrid[i][j].posY +IMAGE_HEIGHT/2 - (ball.posY + IMAGE_HEIGHT/2);
+              distX = ballgrid[i][j].centerX - (ball.centerX);
+              distY = ballgrid[i][j].centerY - (ball.centerY);
               dist = sqrt(pow(distX, 2) + pow(distY, 2));
 
               ballgrid[i][j].distX = distX;
