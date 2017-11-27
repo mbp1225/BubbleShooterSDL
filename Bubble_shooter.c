@@ -285,7 +285,7 @@ NPC* checkCollision()
               ballgrid[i][j].distX = distX;
               ballgrid[i][j].distY = distY;
               ballgrid[i][j].dist = dist;
-              if (dist < IMAGE_WIDTH - 4)
+              if (dist < IMAGE_WIDTH - 8)
               {
                   if(ball.color == ballgrid[i][j].color){
                       /*
@@ -294,7 +294,6 @@ NPC* checkCollision()
                       */
                       printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j);
                   }
-                  printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[i][j].centerY, ball.centerY);
                   /*
                     COLTYPE CODES:
                          6 1
@@ -313,8 +312,6 @@ NPC* checkCollision()
                     else if (ball.centerY > IMAGE_HEIGHT/3*2 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 4;
                     else ballgrid[i][j].coltype = 5;
                   }
-                  printf("coltype = %d\n", ballgrid[i][j].coltype);
-                  printf("player center: %f ballij center: %f\n", ball.centerX, ballgrid[i][j].centerX);
                   return &ballgrid[i][j];
               }
           }
@@ -379,11 +376,14 @@ void NPCCollision(){
           );
           if ((ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY)%2==0){
             ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-              ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].centerX += IMAGE_WIDTH/2;
             ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexX++;
           }
-          printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-          printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY);
+          ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].posX+IMAGE_WIDTH/2;
+          printf("\ncoltype = %d\n", colNPC->coltype);
+          printf("colNPC centerY: %f player centerY: %f new NPC centerY: %f\n", colNPC->centerY, ball.centerY, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].centerY);
+          printf("colNPC centerX: %f player centerX: %f new NPC centerX: %f\n", colNPC->centerX, ball.centerX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].centerX);
+          printf("\ncolNPC indexY: %d            new NPC index Y: %d\n", colNPC->indexY, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY);
+          printf("colNPC indexX: %d            new NPC index X: %d\n", colNPC->indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexX);
           printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1].indexY)%2);
           /*CreateNPC Parameters*/
           /*NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image);*/
@@ -400,10 +400,13 @@ void NPCCollision(){
           );
           if ((ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2==0){
             ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX += IMAGE_WIDTH/2;
-            ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX += IMAGE_WIDTH/2;
             ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX++;
           }
-          printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
+          ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX+IMAGE_WIDTH/2;
+          printf("\n\ncoltype = %d\n", colNPC->coltype);
+          printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerY, ball.centerY);
+          printf("player center: %f new NPC center: %f\n", ball.centerX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX);
+          printf("\ncol NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
           printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
           printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);
           break;
