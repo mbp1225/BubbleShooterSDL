@@ -283,27 +283,25 @@ NPC* checkCollision()
     float dist, distX, distY;
 
     for(i = 0; i < BALLY; i++)
-      for (j = 0; j < BALLX; j++)
-      {
-          if(ballgrid[i][j].color){
+    for (j = 0; j < BALLX; j++)
+    {
+        if(ballgrid[i][j].color){
 
-              distX = ballgrid[i][j].centerX - (ball.centerX);
-              distY = ballgrid[i][j].centerY - (ball.centerY);
-              dist = sqrt(pow(distX, 2) + pow(distY, 2));
+            distX = ballgrid[i][j].centerX - (ball.centerX);
+            distY = ballgrid[i][j].centerY - (ball.centerY);
+            dist = sqrt(pow(distX, 2) + pow(distY, 2));
 
-              ballgrid[i][j].distX = distX;
-              ballgrid[i][j].distY = distY;
-              ballgrid[i][j].dist = dist;
-              if (dist < IMAGE_WIDTH - 8)
-              {
-                  if(ball.color == ballgrid[i][j].color){
-                      /*
-                      ##CHECK AROUND LIGAR DEPOIS!
-                      checkAround(ball.color, &ballgrid[i][j]);
-                      */
-                      printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j);
-                  }
-                  printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[i][j].centerY, ball.centerY);
+            ballgrid[i][j].distX = distX;
+            ballgrid[i][j].distY = distY;
+            ballgrid[i][j].dist = dist;
+
+            if (dist < IMAGE_WIDTH - 6)
+            {
+                /*if(ball.color == ballgrid[i][j].color){*/
+
+                printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j);
+
+                printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[i][j].centerY, ball.centerY);
                   /*
                     COLTYPE CODES:
                          6 1
@@ -336,8 +334,9 @@ NPC* checkCollision()
 
 void NPCCollision()
 {
+    int m, n; /* m = index added to NPC i ; n = index added to NPC j */
 	int ballcolor;
-	NPC *colNPC;
+	NPC *colNPC, *newNPC;
 
 	colNPC = checkCollision();
 
@@ -356,137 +355,86 @@ void NPCCollision()
 		ball.stepY = 0;
 		clicked = 0;
 
-		switch(colNPC->coltype)
-		{
+        switch(colNPC->coltype)
+        {
             case 1:
                 if (colNPC->indexY%2 == 0){
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)] = createNPC(
-                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-                        colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH/2,
-                        ((colNPC->indexY)-1),
-                        ((colNPC->indexX)),
-                        ball.color,
-                        ball.image
-                    );
+                    m = -1;
+                    n = 0;
                 }
                 else{
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1] = createNPC(
-                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-                        (colNPC->indexX) * IMAGE_WIDTH + IMAGE_WIDTH,
-                        ((colNPC->indexY)-1),
-                        ((colNPC->indexX)+1),
-                        ball.color,
-                        ball.image
-                    );
+                    m = -1;
+                    n = +1;
                 }
-                ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
-                ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
             break;
             case 2:
-			  ballgrid[(colNPC->indexY)][(colNPC->indexX)+1] = createNPC(
-				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH,
-				(colNPC->indexY),
-				((colNPC->indexX)+1),
-				ball.color,
-				ball.image
-			  );
-              if (colNPC->indexY%2==1) ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
-              ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
-              ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
+                m = 0;
+                n = +1;
             break;
             case 3:
                 if (colNPC->indexY%2 == 0){
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
-                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-                        colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH/2,
-                        ((colNPC->indexY)+1),
-                        ((colNPC->indexX)),
-                        ball.color,
-                        ball.image
-                    );
+                    m = +1;
+                    n = 0;
                 }
                 else{
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1] = createNPC(
-                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-                        (colNPC->indexX) * IMAGE_WIDTH + IMAGE_WIDTH,
-                        ((colNPC->indexY)+1),
-                        ((colNPC->indexX)+1),
-                        ball.color,
-                        ball.image
-                    );
+                    m = +1;
+                    n = +1;
                 }
-                ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
-                ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
             break;
-			case 4:
+            case 4:
                 if (colNPC->indexY%2 == 0){
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1] = createNPC(
-                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-                        colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH/2,
-                        ((colNPC->indexY)+1),
-                        ((colNPC->indexX)-1),
-                        ball.color,
-                        ball.image
-                    );
+                    m = +1;
+                    n = -1;
                 }
                 else{
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
-                        ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
-                        (colNPC->indexX) * IMAGE_WIDTH,
-                        ((colNPC->indexY)+1),
-                        ((colNPC->indexX)),
-                        ball.color,
-                        ball.image
-                    );
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX + IMAGE_WIDTH/2;
-                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posY + IMAGE_HEIGHT/2;
+                    m = +1;
+                    n = 0;
                 }
-			break;
+            break;
             case 5:
-  			  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1] = createNPC(
-  				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
-  				colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH,
-  				(colNPC->indexY),
-  				((colNPC->indexX)-1),
-  				ball.color,
-  				ball.image
-  			  );
-              if (colNPC->indexY%2==1)
-                  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-              ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX + IMAGE_WIDTH/2;
-              ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posY + IMAGE_HEIGHT/2;
-                break;
+                m = 0;
+                n = -1;
+            break;
             case 6:
                 if (colNPC->indexY%2 == 0){
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1] = createNPC(
-                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-                        colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH/2,
-                        ((colNPC->indexY)-1),
-                        ((colNPC->indexX)-1),
-                        ball.color,
-                        ball.image
-                    );
+                    m = -1;
+                    n = -1;
                 }
                 else{
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)] = createNPC(
-                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-                        (colNPC->indexX) * IMAGE_WIDTH,
-                        ((colNPC->indexY)-1),
-                        ((colNPC->indexX)),
-                        ball.color,
-                        ball.image
-                    );
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].posX + IMAGE_WIDTH/2;
-                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].centerY = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].posY + IMAGE_HEIGHT/2;
+                    m = -1;
+                    n = 0;
                 }
-		}
+        }
+
+        /*(making newNPC)*/
+        ballgrid[(colNPC->indexY)+m][(colNPC->indexX)+n] = createNPC(
+            ((colNPC->indexY)+m) * (IMAGE_HEIGHT-5),
+            (colNPC->indexX) * IMAGE_WIDTH,
+            ((colNPC->indexY)+m),
+            ((colNPC->indexX)+n),
+            ball.color,
+            ball.image
+        );
+        newNPC = &ballgrid[(colNPC->indexY)+m][(colNPC->indexX)+n];
+        /*from now on, newNPC can use this pointer*/
+
+        /*repositioning*/
+        if(colNPC->coltype <= 3)
+            newNPC->posX += IMAGE_WIDTH/2;
+        if((colNPC->coltype==2 || colNPC->coltype == 5) && ((colNPC->indexY)%2 == 1))
+            newNPC->posX += IMAGE_WIDTH/2;
+        newNPC->posX += n*IMAGE_WIDTH/2;
+
+
+        newNPC->centerX = newNPC->posX + IMAGE_WIDTH/2;
+        newNPC->centerY = newNPC->posY + IMAGE_WIDTH/2;
+
 		colNPC->coltype = 0;
 		ballcolor = rand() % 6 + 1;
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
         printGrid();
-	}
+    }
 }
 
 /*Create PLAYER*/
@@ -740,9 +688,7 @@ void game(){
     {
 		movePLAYER();
 		collision();
-		/*
-		repositioning();
-		checkAround();
+        /*checkAround(ball.color, &ballgrid[i][j]);
 	}
 	*
     if (!health){
@@ -924,15 +870,35 @@ void printGrid(){
 
 void checkAround(int color, NPC* colNPC)
 {
-	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
-	ball.color = 0;
+    if(ballgrid[colNPC->indexY][colNPC->indexX].color == ball.color){
+    	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
+    	ball.color = 0;
+    }
 
 	if (colNPC->indexX < 0 && colNPC->indexX > BALLX)
 	{
-		return ;
+		return;
 	}
+    /*
+      COLTYPE CODES:
+           6 1
+          5 O 2
+           4 3
+    */
 	else
 	{
+        /* coltype 2 */
+        if (ballgrid[colNPC->indexY][(colNPC->indexX)+1].color == color)
+        {
+            printf("Right is same\n");
+            if ((colNPC->indexX) + 1 < BALLX)
+            {
+                checkAround(colNPC->indexY, &ballgrid[colNPC->indexY][(colNPC->indexX)+1]);
+            }
+            /*ballgrid[0][Xindex+1].color = 0;*/
+            SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)+1].image );
+        }
+        /* coltype 5 */
 		if (ballgrid[colNPC->indexY][(colNPC->indexX)-1].color == color)
 		{
             printf("Left is same\n");
@@ -940,18 +906,8 @@ void checkAround(int color, NPC* colNPC)
 			{
 				checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)-1]);
 			}
-            /*ballgrid[0][Xindex-1].color = 0;*/
+            ballgrid[colNPC->indexY][(colNPC->indexX)-1].color = 0;
 	        SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)-1].image );
-		}
-		if (ballgrid[colNPC->indexY][(colNPC->indexX)+1].color == color)
-		{
-            printf("Right is same\n");
-			if ((colNPC->indexX) + 1 < BALLX)
-			{
-				checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)+1]);
-			}
-			/*ballgrid[0][Xindex+1].color = 0;*/
-            SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)+1].image );
 		}
 	}
 	return ;
