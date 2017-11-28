@@ -395,7 +395,7 @@ void NPCCollision()
               ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
               ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
             break;
-            case 3: /*certo*/
+            case 3:
                 if (colNPC->indexY%2 == 0){
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
                         ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
@@ -418,11 +418,8 @@ void NPCCollision()
                 }
                 ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
                 ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
-                /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-                printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
-                printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
             break;
-			case 4: /*certo*/
+			case 4:
                 if (colNPC->indexY%2 == 0){
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1] = createNPC(
                         ((colNPC->indexY)+1) * (IMAGE_HEIGHT - 5),
@@ -445,9 +442,6 @@ void NPCCollision()
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX + IMAGE_WIDTH/2;
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posY + IMAGE_HEIGHT/2;
                 }
-                /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-                printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
-                printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
 			break;
             case 5:
   			  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1] = createNPC(
@@ -463,15 +457,7 @@ void NPCCollision()
               ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX + IMAGE_WIDTH/2;
               ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posY + IMAGE_HEIGHT/2;
                 break;
-                /*
-                if ((ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2==1)
-                  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-              printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
-              printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexX, ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY);
-              printf("que = %d\n", (ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2);
-                  break;
-            */
-            case 6: /*certo*/
+            case 6:
                 if (colNPC->indexY%2 == 0){
                     ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1] = createNPC(
                         ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
@@ -502,60 +488,6 @@ void NPCCollision()
         printGrid();
 	}
 }
-
-      /*
-
-      if (ball.posX > ballgrid[colNPC->indexY][colNPC->indexX].posX)
-      {
-          ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-          ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-          ball.stepX = 0;
-          ball.stepY = 0;
-          clicked = 0;
-          */
-          /*checkAround(ball.color,col+1);*/
-          /*
-          ballgrid[(colNPC->indexY) + 1][colNPC->indexX] = createNPC(
-                      ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
-                      colNPC->indexX*IMAGE_WIDTH + IMAGE_WIDTH/2,
-                      (colNPC->indexY) + 1,
-                      colNPC->indexX,
-                      ball.color,
-                      ball.image);
-
-          printf("%d\n", ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5));*/
-          /*if(ballgrid[(colNPC->indexY) + 1][colNPC->indexX].indexY % 2) ballgrid[(colNPC->indexY) + 1][colNPC->indexX].posX += IMAGE_WIDTH/2;*/
-          /*drawNPC(ballgrid[(colNPC->indexY) + 1][colNPC->indexX]);
-      }
-
-      else
-      {
-          ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-          ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-          ball.stepX = 0;
-          ball.stepY = 0;
-          clicked = 0;
-          */
-          /*checkAround(ball.color,col-1);*/
-          /*
-          ballgrid[colNPC->indexY+1][(colNPC->indexX) - 1] = createNPC(
-                      ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5),
-                      ((colNPC->indexX) - 1)*IMAGE_WIDTH + IMAGE_WIDTH/2,
-                      (colNPC->indexY) + 1,
-                      (colNPC->indexX) - 1,
-                      ball.color,
-                      ball.image);
-
-          printf("%d\n", ((colNPC->indexY) + 1) * (IMAGE_HEIGHT-5));*/
-          /*if(ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1].indexY % 2) ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1].posX += IMAGE_WIDTH/2;*/
-          /*drawNPC(ballgrid[(colNPC->indexY) + 1][(colNPC->indexX) - 1]);
-      }
-      ballcolor = rand()%6+1;
-      ball.color = ballcolor;
-      ball.image = GetColor(ballcolor);
-
-    }
-}*/
 
 /*Create PLAYER*/
 PLAYER createPLAYER( float posX, float posY,
