@@ -155,13 +155,13 @@ NPC* checkCollision();
 void WallCollision();
 
 /*checks ball collision  against the ceiling*/
-void CeilingCollision();
+NPC* CeilingCollision();
 
 /*checks ball collision against an NPC*/
-void NPCCollision();
+NPC* NPCCollision();
 
 /*calls NPC and Ceiling Collision*/
-void collision();
+NPC* collision();
 
 /*checks if the balls around are the same color*/
 void checkAround(int color, NPC* colNPC);
@@ -227,13 +227,17 @@ void movePLAYER()
 
 }
 
-void collision()
+NPC* collision()
 {
-  /*Checks if there's any ceiling collision for it inside the function*/
-  CeilingCollision();
+    NPC *n;
 
-  /*Checks if there's any NPC collision for it inside the function*/
-  NPCCollision();
+    /*Checks if there's any ceiling collision for it inside the function*/
+    n = CeilingCollision();
+
+    /*Checks if there's any NPC collision for it inside the function*/
+    n = NPCCollision();
+
+    return n;
 }
 
 void WallCollision()
@@ -246,7 +250,7 @@ void WallCollision()
     }
 }
 
-void CeilingCollision()
+NPC* CeilingCollision()
 {
   int ballcolor;
   int newX;
@@ -274,7 +278,10 @@ void CeilingCollision()
       ballcolor = rand() % 6 + 1;
       ball.color = ballcolor;
       ball.image = GetColor(ballcolor);
+
+      return &ballgrid[0][newX];
   }
+  return NULL;
 }
 
 NPC* checkCollision()
@@ -332,7 +339,7 @@ NPC* checkCollision()
     return NULL;
 }
 
-void NPCCollision()
+NPC* NPCCollision()
 {
     int m, n; /* m = index added to NPC i ; n = index added to NPC j */
 	int ballcolor;
@@ -434,7 +441,10 @@ void NPCCollision()
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
         printGrid();
+
+        return newNPC;
     }
+    return NULL;
 }
 
 /*Create PLAYER*/
