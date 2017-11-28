@@ -33,11 +33,15 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 /*Velocidade da bolha*/
-const int MSPEED = 12;
+const int MSPEED = 8;
 
-/*Quantidade de bolhas na primeira linha*/
+/*Quantidade de bolhas total*/
 const int BALLX = 20;
 const int BALLY = 20;
+
+/*Quantidade de bolhas na grid inicial*/
+const int GRIDX = 19;
+const int GRIDY = 5;
 
 const int false = 0;
 const int true = 1;
@@ -131,6 +135,9 @@ PLAYER createPLAYER( float posX, float posY, float stepX, float stepY, int color
 
 /*Create NPC*/
 NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image);
+
+/*Prepares grid*/
+void prepareGrid();
 
 /*Create grid*/
 void createGrid(int ballY, int ballX);
@@ -317,8 +324,6 @@ NPC* checkCollision()
                     else ballgrid[i][j].coltype = 5;
                   }
 
-
-                  if (ballgrid[i][j].coltype == 1 || ballgrid[i][j].coltype == 6) return NULL;
                   printf("coltype = %d\n", ballgrid[i][j].coltype);
                   printf("player center: %f ballij center: %f\n", ball.centerX, ballgrid[i][j].centerX);
                   return &ballgrid[i][j];
@@ -353,20 +358,30 @@ void NPCCollision()
 
 		switch(colNPC->coltype)
 		{
-		  /*  case 1:
-			  ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1] = createNPC(
-				((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH,
-				((colNPC->indexY)-1),
-				((colNPC->indexX)+1),
-				ball.color,
-				ball.image
-			  );
-
-			  if (!(ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].indexY)%2)
-				ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
-			  break;
-        */
+            case 1:
+                if (colNPC->indexY%2 == 0){
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)] = createNPC(
+                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
+                        colNPC->indexX * IMAGE_WIDTH + IMAGE_WIDTH/2,
+                        ((colNPC->indexY)-1),
+                        ((colNPC->indexX)),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                else{
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1] = createNPC(
+                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
+                        (colNPC->indexX) * IMAGE_WIDTH + IMAGE_WIDTH,
+                        ((colNPC->indexY)-1),
+                        ((colNPC->indexX)+1),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
+                ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
+            break;
             case 2:
 			  ballgrid[(colNPC->indexY)][(colNPC->indexX)+1] = createNPC(
 				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
@@ -377,7 +392,9 @@ void NPCCollision()
 				ball.image
 			  );
               if (colNPC->indexY%2==1) ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX += IMAGE_WIDTH/2;
-              break;
+              ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
+              ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
+            break;
             case 3: /*certo*/
                 if (colNPC->indexY%2 == 0){
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)] = createNPC(
@@ -399,10 +416,12 @@ void NPCCollision()
                         ball.image
                     );
                 }
+                ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posX + IMAGE_WIDTH/2;
+                ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)+1].posY + IMAGE_HEIGHT/2;
                 /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
                 printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
                 printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
-                break;
+            break;
 			case 4: /*certo*/
                 if (colNPC->indexY%2 == 0){
                     ballgrid[(colNPC->indexY)+1][(colNPC->indexX)-1] = createNPC(
@@ -423,11 +442,13 @@ void NPCCollision()
                         ball.color,
                         ball.image
                     );
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posX + IMAGE_WIDTH/2;
+                    ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].centerY = ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].posY + IMAGE_HEIGHT/2;
                 }
                 /*printf("col NPC index X: %d\ncol NPC index Y: %d\n", colNPC->indexX, colNPC->indexY);
                 printf("new NPC index X: %d\nnew NPC index Y: %d\n", ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexX, ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY);
                 printf("que = %d\n", (ballgrid[(colNPC->indexY)+1][(colNPC->indexX)].indexY)%2);*/
-			  break;
+			break;
             case 5:
   			  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1] = createNPC(
   				(colNPC->indexY) * (IMAGE_HEIGHT - 5),
@@ -437,7 +458,10 @@ void NPCCollision()
   				ball.color,
   				ball.image
   			  );
-              if (colNPC->indexY%2==1) ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
+              if (colNPC->indexY%2==1)
+                  ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
+              ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerX = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posX + IMAGE_WIDTH/2;
+              ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].centerY = ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].posY + IMAGE_HEIGHT/2;
                 break;
                 /*
                 if ((ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2==1)
@@ -447,19 +471,29 @@ void NPCCollision()
               printf("que = %d\n", (ballgrid[(colNPC->indexY)][(colNPC->indexX)-1].indexY)%2);
                   break;
             */
-            /*
-			case 6:
-			  ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1] = createNPC(
-				((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
-				colNPC->indexX * IMAGE_WIDTH,
-				((colNPC->indexY)-1),
-				((colNPC->indexX)-1),
-				ball.color,
-				ball.image
-			  );
-			  if (!(ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1].indexY)%2)
-				ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1].posX += IMAGE_WIDTH/2;
-			  break;*/
+            case 6: /*certo*/
+                if (colNPC->indexY%2 == 0){
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1] = createNPC(
+                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
+                        colNPC->indexX * IMAGE_WIDTH - IMAGE_WIDTH/2,
+                        ((colNPC->indexY)-1),
+                        ((colNPC->indexX)-1),
+                        ball.color,
+                        ball.image
+                    );
+                }
+                else{
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)] = createNPC(
+                        ((colNPC->indexY)-1) * (IMAGE_HEIGHT - 5),
+                        (colNPC->indexX) * IMAGE_WIDTH,
+                        ((colNPC->indexY)-1),
+                        ((colNPC->indexX)),
+                        ball.color,
+                        ball.image
+                    );
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].centerX = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].posX + IMAGE_WIDTH/2;
+                    ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].centerY = ballgrid[(colNPC->indexY)-1][(colNPC->indexX)].posY + IMAGE_HEIGHT/2;
+                }
 		}
 		colNPC->coltype = 0;
 		ballcolor = rand() % 6 + 1;
@@ -618,21 +652,20 @@ void createGrid(int ballY, int ballX)
     SDL_Surface* BallSurface;
 
     /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
-	for (i = 0; i < 1; i++)
+	for (i = 0; i < ballY; i++)
 	{
 		for (j=0; j < ballX; j++)
 		{
 			ballcolor = rand() % 6 + 1;
     		BallSurface = GetColor(ballcolor);
 			ballgrid[i][j] = createNPC(
-				i*IMAGE_HEIGHT,
-				j*IMAGE_WIDTH,
+				i*(IMAGE_HEIGHT - 5),
+				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2),
 				i,
 				j,
                 ballcolor,
 				BallSurface
             );
-
 			drawNPC(ballgrid[i][j]);
 		}
 	}
@@ -932,7 +965,7 @@ int PrepareGame()
   backg = makeBACKGROUND();
 
   /*Create Ball Grid*/
-  createGrid(BALLY, BALLX);
+  createGrid(GRIDY, GRIDX);
 
   /*Create PLAYER*/
 
@@ -949,7 +982,7 @@ int PrepareGame()
 void printGrid(){
     int i, j;
     for(i=0; i<20; i++){
-        for(j=0; j<20; j++){
+        for(j=0; j<19; j++){
             if(i%2==0) printf("%d ", ballgrid[i][j].color);
             else printf(" %d", ballgrid[i][j].color);
         }
