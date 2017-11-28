@@ -428,8 +428,11 @@ NPC* NPCCollision()
         /*repositioning*/
         if(colNPC->coltype <= 3)
             newNPC->posX += IMAGE_WIDTH/2;
-        if((colNPC->coltype==2 || colNPC->coltype == 5) && ((colNPC->indexY)%2 == 1))
+        if((colNPC->coltype == 2 || colNPC->coltype == 5) && ((colNPC->indexY)%2 == 1))
             newNPC->posX += IMAGE_WIDTH/2;
+        if(colNPC->coltype == 5){
+            newNPC->posX -= IMAGE_WIDTH/2;
+        }
         newNPC->posX += n*IMAGE_WIDTH/2;
 
 
