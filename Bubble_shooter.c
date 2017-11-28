@@ -164,7 +164,7 @@ NPC* NPCCollision();
 NPC* collision();
 
 /*checks if the balls around are the same color*/
-void checkAround(int color, NPC* colNPC);
+void checkAround(NPC* n);
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -435,7 +435,7 @@ NPC* NPCCollision()
         }
         newNPC->posX += n*IMAGE_WIDTH/2;
 
-
+        /*
         newNPC->centerX = newNPC->posX + IMAGE_WIDTH/2;
         newNPC->centerY = newNPC->posY + IMAGE_WIDTH/2;
 
@@ -677,7 +677,7 @@ void shoot(){
 }
 
 void game(){
-
+    NPC *n;
     /*Por enquanto, este é o play(){*/
     SDL_Event e;
 
@@ -700,8 +700,8 @@ void game(){
     if(clicked)
     {
 		movePLAYER();
-		collision();
-        /*checkAround(ball.color, &ballgrid[i][j]);
+		n = collision();
+        checkAround(n);
 	}
 	*
     if (!health){
@@ -709,7 +709,7 @@ void game(){
         health = 5;
     }
 
-    newball();*/
+    newball();
     }
 
     RefreshScreen();
@@ -881,9 +881,9 @@ void printGrid(){
     }
 }
 
-void checkAround(int color, NPC* colNPC)
+void checkAround(NPC* npc)
 {
-    if(ballgrid[colNPC->indexY][colNPC->indexX].color == ball.color){
+    if(ballgrid[npc->indexY][npcNPC->indexX].color == ball.color){
     	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
     	ball.color = 0;
     }
