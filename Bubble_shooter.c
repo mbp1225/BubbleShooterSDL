@@ -164,7 +164,7 @@ NPC* NPCCollision();
 NPC* collision();
 
 /*checks if the balls around are the same color*/
-void checkAround(int color, NPC* colNPC, int type);
+void checkAround(NPC* npc, int checkcolor);
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -231,11 +231,11 @@ NPC* collision()
 {
     NPC *n;
 
-    /*Checks if there's any ceiling collision for it inside the function*/
-    n = CeilingCollision();
-
     /*Checks if there's any NPC collision for it inside the function*/
     n = NPCCollision();
+
+    /*Checks if there's any ceiling collision for it inside the function*/
+    n = CeilingCollision();
 
     return n;
 }
@@ -274,7 +274,8 @@ NPC* CeilingCollision()
           ball.image
       );
 
-      drawNPC(ballgrid[1][newX]);
+      checkAround(&ballgrid[0][newX], ballgrid[0][newX].color);
+      drawNPC(ballgrid[0][newX]);
       ballcolor = rand() % 6 + 1;
       ball.color = ballcolor;
       ball.image = GetColor(ballcolor);
@@ -439,8 +440,7 @@ NPC* NPCCollision()
         newNPC->centerX = newNPC->posX + IMAGE_WIDTH/2;
         newNPC->centerY = newNPC->posY + IMAGE_WIDTH/2;
 
-        checkAround(newNPC->color,newNPC,0);
-
+        checkAround(newNPC, newNPC->color);
 		colNPC->coltype = 0;
 		ballcolor = rand() % 6 + 1;
 		ball.color = ballcolor;
@@ -679,7 +679,7 @@ void shoot(){
 }
 
 void game(){
-
+    /*NPC *n;*/
     /*Por enquanto, este é o play(){*/
     SDL_Event e;
 
@@ -703,16 +703,16 @@ void game(){
     {
 		movePLAYER();
 		collision();
-        /*checkAround(ball.color, &ballgrid[i][j]);
+        /*checkAround(n);*/
 	}
-	*
+    /*
     if (!health){
 		newline();
         health = 5;
     }
 
-    newball();*/
-    }
+    newball();
+}*/
 
     RefreshScreen();
 }
@@ -883,71 +883,73 @@ void printGrid(){
     }
 }
 
-void checkAround(int color, NPC* colNPC, int type)
+void checkAround(NPC* npc, int checkcolor)
 {
-    if(ballgrid[colNPC->indexY][colNPC->indexX].color == ball.color){
-    	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
-    	ball.color = 0;
-        SDL_FreeSurface( ballgrid[colNPC->indexY][colNPC->indexX].image);
+    int n;
+
+	if (npc->indexX < 0 && npc->indexX > BALLX) return;
+
+    for(n = 0; n <= 1; n++){
+        if((npc->indexY)%2 == n){
+            /*case 3*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color == checkcolor){
+                npc->color = 0;
+                ballgrid[(npc->indexY)+1][(npc->indexX)+n].color = 0;
+                SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n].image);
+                checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n], checkcolor);
+            }
+            /*case 1*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color == checkcolor){
+                npc->color = 0;
+                ballgrid[(npc->indexY)-1][(npc->indexX)+n].color = 0;
+                SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n].image);
+                checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n], checkcolor);
+            }
+            /*case 6*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color == checkcolor){
+                npc->color = 0;
+                ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color = 0;
+                SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].image);
+                checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1], checkcolor);
+            }
+            /*case 4*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color == checkcolor){
+                npc->color = 0;
+                ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color = 0;
+                SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].image);
+                checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1], checkcolor);
+            }
+        }
+    }
+    /*case 2*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)-1].color == checkcolor){
+        npc->color = 0;
+        ballgrid[(npc->indexY)][(npc->indexX)-1].color = 0;
+        SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)-1].image);
+        checkAround (&ballgrid[(npc->indexY)][(npc->indexX)-1], checkcolor);
+    }
+    /*case 5*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)+1].color == checkcolor){
+        npc->color = 0;
+        ballgrid[(npc->indexY)][(npc->indexX)+1].color = 0;
+        SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
+        checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
     }
 
-	if (colNPC->indexX < 0 && colNPC->indexX > GRIDX)
-	{
-		return;
-	}
+    /*if(ballgrid[npc->indexY][npc->indexX].color == ball.color){
+    	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
+    	ball.color = 0;
+    }*/
+
     /*
       COLTYPE CODES:
            6 1
           5 O 2
            4 3
-    */
-	else
-	{
-        /* coltype 2 */
-        if (ballgrid[colNPC->indexY][(colNPC->indexX)+1].color == color && type != 1)
-        {
-            printf("Right is same\n");
-            if ((colNPC->indexX) < GRIDX -1)
-            {
-                checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)+1],2);
-                SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)+1].image );
-            }
-            ballgrid[colNPC->indexY][(colNPC->indexX)+1].color = 0;
-        }
 
-        /* coltype 5 */
-		if (ballgrid[colNPC->indexY][(colNPC->indexX)-1].color == color && type != 2)
-		{
-            printf("Left is same\n");
-			if ((colNPC->indexX) - 1 > 0)
-			{
-				checkAround(color, &ballgrid[colNPC->indexY][(colNPC->indexX)-1],1);
-                SDL_FreeSurface( ballgrid[colNPC->indexY][(colNPC->indexX)-1].image );
-			}
-            ballgrid[colNPC->indexY][(colNPC->indexX)-1].color = 0;
-		}
-        /*coltype below*/
-        if (ballgrid[(colNPC->indexY)-1][colNPC->indexX].color == color)
-		{
-            printf("Top is same\n");
-            checkAround(color, &ballgrid[(colNPC->indexY)-1][colNPC->indexX],0);
-            ballgrid[(colNPC->indexY)-1][colNPC->indexX].color = 0;
-	        SDL_FreeSurface( ballgrid[(colNPC->indexY)-1][colNPC->indexX].image );
-		}
-        if (ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].color == color && (colNPC->indexY%2) == 1)
-		{
-            printf("Top is same\n");
-            checkAround(color, &ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1],0);
-            ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].color = 0;
-	        SDL_FreeSurface( ballgrid[(colNPC->indexY)-1][(colNPC->indexX)+1].image );
-		}
-        if (ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1].color == color && (colNPC->indexY%2) != 1)
-		{
-            printf("Top is same\n");
-            checkAround(color, &ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1],0);
-            ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1].color = 0;
-	        SDL_FreeSurface( ballgrid[(colNPC->indexY)-1][(colNPC->indexX)-1].image );
-		}
-	}
+	else
+	{*/
+        /* coltype 2 */
+
 	return ;
 }
