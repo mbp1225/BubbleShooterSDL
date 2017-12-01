@@ -271,7 +271,7 @@ NPC* CeilingCollision()
       clicked = 0;
 
       ballgrid[1][newX] = createNPC(
-          BORDER,
+          BORDER+2,
           newX*IMAGE_WIDTH + IMAGE_WIDTH/4,
           1,
           newX,
