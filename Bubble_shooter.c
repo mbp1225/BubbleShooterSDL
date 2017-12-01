@@ -243,8 +243,10 @@ NPC* collision()
     n = NPCCollision();
 
     /*Checks if there's any ceiling collision for it inside the function*/
-    n = CeilingCollision();
+    if (n == NULL)
+        n = CeilingCollision();
 
+    if (n != NULL) printGrid();
     return n;
 }
 
@@ -388,7 +390,7 @@ NPC* NPCCollision()
                 n = +1;
             break;
             case 3:
-                if (colNPC->indexY%2 == 0){
+                if (colNPC->indexY%2 == 0 || colNPC->indexX == 18){
                     m = +1;
                     n = 0;
                 }
@@ -398,7 +400,7 @@ NPC* NPCCollision()
                 }
             break;
             case 4:
-                if (colNPC->indexY%2 == 0){
+                if (colNPC->indexY%2 == 0 && colNPC->indexX != 1){
                     m = +1;
                     n = -1;
                 }
@@ -450,12 +452,19 @@ NPC* NPCCollision()
         newNPC->centerX = newNPC->posX + IMAGE_WIDTH/2;
         newNPC->centerY = newNPC->posY + IMAGE_WIDTH/2;
 
+        /*Checking if there's a ball over the border*/
+        if (newNPC->posX < IMAGE_WIDTH && (newNPC->indexY)%2 == 1){
+            newNPC->posX += IMAGE_WIDTH/2;
+        }
+        if (newNPC->posX > SCREEN_WIDTH-(BORDER + 3*IMAGE_WIDTH/2) && (newNPC->indexY)%2 == 0){
+            newNPC->posX -= IMAGE_WIDTH/2
+        }
+
         checkAround(newNPC, newNPC->color);
 		colNPC->coltype = 0;
 		ballcolor = rand() % COLORS + 1;
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
-        printGrid();
 
         return newNPC;
     }
@@ -937,6 +946,8 @@ void gridDown()
 void checkAround(NPC* npc, int checkcolor)
 {
     int n;
+
+    printf("aaaa\n");
 
 	if (npc->indexX < 0 && npc->indexX > BALLX) return;
 
