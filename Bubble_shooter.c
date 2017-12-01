@@ -107,6 +107,8 @@ PLAYER ball;
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
 
+int ballCount = 0;
+
 /*Ball surface*/
 SDL_Surface* BallSurface;
 
@@ -118,6 +120,9 @@ SDL_Surface* PUI;
 
 /*Background*/
 BACKGROUND backg;
+
+/*Keeps the NPC where the check started*/
+NPC* destructionStart = NULL;
 
 /*
  * function prototypes
@@ -168,8 +173,11 @@ NPC* NPCCollision();
 /*calls NPC and Ceiling Collision*/
 NPC* collision();
 
-/*checks if the balls around are the same color*/
+/*Destroys the surrounding balls of the same color*/
 void checkAround(NPC* npc, int checkcolor);
+
+/*Checks if there are enough balls to trigger destruction*/
+void checkDestruction(NPC* npc, int checkcolor);
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -288,8 +296,9 @@ NPC* CeilingCollision()
       );
 
       ball.image = NULL;
-      
-      checkAround(&ballgrid[1][newX], ballgrid[1][newX].color);
+
+      ballCount = 0;
+      checkDestruction(&ballgrid[1][newX], ballgrid[1][newX].color);
       drawNPC(ballgrid[1][newX]);
       ballcolor = rand() % COLORS + 1;
       ball.color = ballcolor;
@@ -461,7 +470,8 @@ NPC* NPCCollision()
             newNPC->posX -= IMAGE_WIDTH/2;
         }
 
-        checkAround(newNPC, newNPC->color);
+        ballCount = 0;
+        checkDestruction(newNPC, newNPC->color);
 		colNPC->coltype = 0;
 		ballcolor = rand() % COLORS + 1;
 		ball.color = ballcolor;
@@ -947,7 +957,7 @@ void gridDown()
 void checkAround(NPC* npc, int checkcolor)
 {
     int n;
-    SDL_Delay(10);
+    SDL_Delay(25);
     RefreshScreen();
 
     /*
@@ -1005,6 +1015,79 @@ void checkAround(NPC* npc, int checkcolor)
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
     }
+
+	return ;
+}
+
+void checkDestruction(NPC* npc, int checkcolor)
+{
+    int n;
+    static int currentCount = 0;
+    currentCount++;
+    printf("currentCount = %d\n", currentCount);
+
+    if (ballCount == 0)
+    {
+        destructionStart = npc;
+    }
+    else if (currentCount > 3)
+    {
+        currentCount = 0;
+        return;
+    }
+    else if (ballCount > 2)
+    {
+        printf("ballCount = %d\n", ballCount);
+        ballCount = 0;
+        checkAround(destructionStart,destructionStart->color);
+        destructionStart = NULL;
+        currentCount = 0;
+        return;
+    }
+    /*
+      COLTYPE CODES:
+           6 1
+          5 O 2
+           4 3
+    */
+
+	if (npc->indexX < 0 && npc->indexX > BALLX) return;
+
+    for(n = 0; n <= 1; n++){
+        if((npc->indexY)%2 == n){
+            /*case 3*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color == checkcolor){
+                ballCount++;
+                checkDestruction (&ballgrid[(npc->indexY)+1][(npc->indexX)+n], checkcolor);
+            }
+            /*case 1*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color == checkcolor){
+                ballCount++;
+                checkDestruction (&ballgrid[(npc->indexY)-1][(npc->indexX)+n], checkcolor);
+            }
+            /*case 6*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color == checkcolor){
+                ballCount++;
+                checkDestruction (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1], checkcolor);
+            }
+            /*case 4*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color == checkcolor){
+                ballCount++;
+                checkDestruction (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1], checkcolor);
+            }
+        }
+    }
+    /*case 2*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)-1].color == checkcolor){
+        ballCount++;
+        checkDestruction (&ballgrid[(npc->indexY)][(npc->indexX)-1], checkcolor);
+    }
+    /*case 5*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)+1].color == checkcolor){
+        ballCount++;
+        checkDestruction (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
+    }
+
 
 	return ;
 }
