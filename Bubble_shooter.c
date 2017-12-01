@@ -246,7 +246,15 @@ NPC* collision()
     if (n == NULL)
         n = CeilingCollision();
 
-    if (n != NULL) printGrid();
+    if (n != NULL){
+        printGrid();
+        ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
+        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+        ball.stepY = 0;
+        ball.stepX = 0;
+        clicked = 0;
+    }
+
     return n;
 }
 
@@ -269,11 +277,6 @@ NPC* CeilingCollision()
   {
       newX = (int)((ball.posX) / IMAGE_WIDTH);
       if (ball.posX > newX*IMAGE_WIDTH + IMAGE_WIDTH/2) newX++;
-      ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-      ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-      ball.stepY = 0;
-      ball.stepX = 0;
-      clicked = 0;
 
       ballgrid[1][newX] = createNPC(
           IMAGE_HEIGHT-5,
@@ -284,6 +287,8 @@ NPC* CeilingCollision()
           ball.image
       );
 
+      ball.image = NULL;
+      
       checkAround(&ballgrid[1][newX], ballgrid[1][newX].color);
       drawNPC(ballgrid[1][newX]);
       ballcolor = rand() % COLORS + 1;
@@ -367,12 +372,6 @@ NPC* NPCCollision()
 
     if (colNPC)
     {
-		ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-		ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-		ball.stepX = 0;
-		ball.stepY = 0;
-		clicked = 0;
-
         switch(colNPC->coltype)
         {
             case 1:
@@ -436,6 +435,8 @@ NPC* NPCCollision()
         newNPC = &ballgrid[(colNPC->indexY)+m][(colNPC->indexX)+n];
         /*from now on, newNPC can use this pointer*/
 
+        ball.image = NULL;
+
         /*repositioning*/
         if(colNPC->coltype <= 3)
             newNPC->posX += IMAGE_WIDTH/2;
@@ -457,7 +458,7 @@ NPC* NPCCollision()
             newNPC->posX += IMAGE_WIDTH/2;
         }
         if (newNPC->posX > SCREEN_WIDTH-(BORDER + 3*IMAGE_WIDTH/2) && (newNPC->indexY)%2 == 0){
-            newNPC->posX -= IMAGE_WIDTH/2
+            newNPC->posX -= IMAGE_WIDTH/2;
         }
 
         checkAround(newNPC, newNPC->color);
@@ -946,8 +947,15 @@ void gridDown()
 void checkAround(NPC* npc, int checkcolor)
 {
     int n;
+    SDL_Delay(10);
+    RefreshScreen();
 
-    printf("aaaa\n");
+    /*
+      COLTYPE CODES:
+           6 1
+          5 O 2
+           4 3
+    */
 
 	if (npc->indexX < 0 && npc->indexX > BALLX) return;
 
@@ -997,21 +1005,6 @@ void checkAround(NPC* npc, int checkcolor)
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
     }
-
-    /*if(ballgrid[npc->indexY][npc->indexX].color == ball.color){
-    	ballgrid[colNPC->indexY][colNPC->indexX].color = 0;
-    	ball.color = 0;
-    }*/
-
-    /*
-      COLTYPE CODES:
-           6 1
-          5 O 2
-           4 3
-
-	else
-	{*/
-        /* coltype 2 */
 
 	return ;
 }
