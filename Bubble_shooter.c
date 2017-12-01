@@ -180,6 +180,9 @@ void RefreshScreen(void);
 /*Prints grid in the terminal*/
 void printGrid();
 
+/*Moves the grid down when called*/
+void gridDown();
+
 /*Displays player on screen*/
 void drawPLAYER(PLAYER p);
 
@@ -690,20 +693,25 @@ void game(){
     /*Por enquanto, este é o play(){*/
     SDL_Event e;
 
-    while( SDL_PollEvent(&e) )
+    while( SDL_PollEvent( &e ) != 0 )
     {
-        switch (e.type)
+        if( e.type == SDL_QUIT )
         {
-            case SDL_QUIT:
-                quit = true;
-                break;
-            case SDL_KEYDOWN:
-                if (e.key.keysym.sym == SDLK_ESCAPE) quit = true;
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (e.button.button == SDL_BUTTON_LEFT && !clicked) shoot();
-                break;
+            quit = true;
         }
+        else if( e.type == SDL_KEYDOWN )
+        {
+            switch( e.key.keysym.sym )
+            {
+                case SDLK_UP: printf("UP\n");
+                break;
+                case SDLK_DOWN: gridDown();
+                break;
+                case SDLK_ESCAPE: quit = true;
+                break;
+            }
+        }
+        else if (e.button.button == SDL_BUTTON_LEFT && !clicked) shoot();
     }
 
     if(clicked)
@@ -887,6 +895,42 @@ void printGrid(){
             else printf(" %d", ballgrid[i][j].color);
         }
         printf("\n");
+    }
+}
+
+void gridDown()
+{
+    int i, j, ballcolor;
+
+    for (i = BALLY-1; i > 0; i--)
+	{
+		for (j=1; j < BALLX-1; j++)
+		{
+			ballgrid[i+1][j] = createNPC(
+				(i+1)*(IMAGE_HEIGHT - 5),
+				j*IMAGE_WIDTH + ((i+1)%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
+				i+1,
+				j,
+                ballgrid[i][j].color,
+				GetColor(ballgrid[i][j].color)
+            );
+            printf("Ball Created\n");
+			drawNPC(ballgrid[i+1][j]);
+		}
+	}
+    for (j=1; j < BALLX-1; j++)
+    {
+        ballcolor = rand() % COLORS + 1;
+        BallSurface = GetColor(ballcolor);
+        ballgrid[1][j] = createNPC(
+            1*(IMAGE_HEIGHT - 5),
+            j*IMAGE_WIDTH + (1%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
+            1,
+            j,
+            ballcolor,
+            BallSurface
+        );
+        drawNPC(ballgrid[1][j]);
     }
 }
 
