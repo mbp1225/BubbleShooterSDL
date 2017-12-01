@@ -31,9 +31,14 @@
 /*Screen dimension constants*/
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+/*Border Width*/
+const int BORDER = 24;
 
 /*Velocidade da bolha*/
 const int MSPEED = 8;
+
+/*Amount of different colors for the balls*/
+const int COLORS = 2;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -242,8 +247,8 @@ NPC* collision()
 
 void WallCollision()
 {
-    if ( (ball.posX + IMAGE_WIDTH > SCREEN_WIDTH) ||
-         (ball.posX < 0) )
+    if ( (ball.posX + IMAGE_WIDTH > SCREEN_WIDTH - BORDER) ||
+         (ball.posX < BORDER) )
     {
         ball.stepX =- ball.stepX;
         ball.posX += ball.stepX;
@@ -255,7 +260,7 @@ NPC* CeilingCollision()
   int ballcolor;
   int newX;
 
-  if (ball.posY < 0)
+  if (ball.posY < BORDER + 5)
   {
       newX = (int)((ball.posX) / IMAGE_WIDTH);
       if (ball.posX > newX*IMAGE_WIDTH + IMAGE_WIDTH/2) newX++;
@@ -265,18 +270,18 @@ NPC* CeilingCollision()
       ball.stepX = 0;
       clicked = 0;
 
-      ballgrid[0][newX] = createNPC(
-          0,
-          newX*IMAGE_WIDTH,
-          0,
+      ballgrid[1][newX] = createNPC(
+          BORDER,
+          newX*IMAGE_WIDTH + IMAGE_WIDTH/4,
+          1,
           newX,
           ball.color,
           ball.image
       );
 
-      checkAround(&ballgrid[0][newX], ballgrid[0][newX].color);
-      drawNPC(ballgrid[0][newX]);
-      ballcolor = rand() % 6 + 1;
+      checkAround(&ballgrid[1][newX], ballgrid[1][newX].color);
+      drawNPC(ballgrid[1][newX]);
+      ballcolor = rand() % COLORS + 1;
       ball.color = ballcolor;
       ball.image = GetColor(ballcolor);
 
@@ -290,8 +295,8 @@ NPC* checkCollision()
     int i, j;
     float dist, distX, distY;
 
-    for(i = 0; i < BALLY; i++)
-    for (j = 0; j < BALLX; j++)
+    for(i = 1; i < BALLY; i++)
+    for (j = 1; j <= BALLX; j++)
     {
         if(ballgrid[i][j].color){
 
@@ -436,13 +441,15 @@ NPC* NPCCollision()
         }
         newNPC->posX += n*IMAGE_WIDTH/2;
 
+        newNPC->posX -= IMAGE_WIDTH/4;
+
 
         newNPC->centerX = newNPC->posX + IMAGE_WIDTH/2;
         newNPC->centerY = newNPC->posY + IMAGE_WIDTH/2;
 
         checkAround(newNPC, newNPC->color);
 		colNPC->coltype = 0;
-		ballcolor = rand() % 6 + 1;
+		ballcolor = rand() % COLORS + 1;
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
         printGrid();
@@ -547,15 +554,15 @@ void createGrid(int ballY, int ballX)
     SDL_Surface* BallSurface;
 
     /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
-	for (i = 0; i < ballY; i++)
+	for (i = 1; i < ballY; i++)
 	{
-		for (j=0; j < ballX; j++)
+		for (j=1; j < ballX; j++)
 		{
-			ballcolor = rand() % 6 + 1;
+			ballcolor = rand() % COLORS + 1;
     		BallSurface = GetColor(ballcolor);
 			ballgrid[i][j] = createNPC(
 				i*(IMAGE_HEIGHT - 5),
-				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2),
+				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
 				i,
 				j,
                 ballcolor,
@@ -732,7 +739,7 @@ int init() {
     else
     {
         /*Create window*/ /*##Trocar o nome*/
-        gWindow = SDL_CreateWindow( "Pelo menos o Catarina tem que tirar 1.5", SDL_WINDOWPOS_UNDEFINED,
+        gWindow = SDL_CreateWindow( "Bubble Shooter", SDL_WINDOWPOS_UNDEFINED,
 									SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
         if( gWindow == NULL )
         {
@@ -844,7 +851,7 @@ int PrepareGame()
   }
 
 
-  ballcolor = rand() % 6 + 1;
+  ballcolor = rand() % COLORS + 1;
   BallSurface = GetColor(ballcolor);
 
   /*Load media*/
@@ -875,7 +882,7 @@ int PrepareGame()
 void printGrid(){
     int i, j;
     for(i=0; i<20; i++){
-        for(j=0; j<19; j++){
+        for(j=0; j<=19; j++){
             if(i%2==0) printf("%d ", ballgrid[i][j].color);
             else printf(" %d", ballgrid[i][j].color);
         }
