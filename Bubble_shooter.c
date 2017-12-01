@@ -89,6 +89,7 @@ typedef struct _NPC
     float centerX;
     float centerY;
     int coltype;
+    int remain;
 } NPC;
 
 /*
@@ -178,6 +179,12 @@ void checkAround(NPC* npc, int checkcolor);
 
 /*Checks if there are enough balls to trigger destruction*/
 void checkDestruction(NPC* npc, int checkcolor);
+
+/*Turns npc->remain to 1*/
+void checkIsland(NPC* npc);
+
+/*Destroys Islands*/
+void DestroyIsland();
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -516,6 +523,7 @@ NPC createNPC(float posY, float posX,
 	n.centerX = posX + IMAGE_WIDTH/2;
 	n.centerY = posY + IMAGE_HEIGHT/2;
 	n.coltype = 0;
+    n.remain = 0;
 
 	return n;
 
@@ -954,6 +962,54 @@ void gridDown()
     }
 }
 
+void checkIsland(NPC* npc)
+{
+    int n;
+    npc->remain = 1;
+    printf("AA\n");
+
+    /*
+      COLTYPE CODES:
+           6 1
+          5 O 2
+           4 3
+    */
+
+	if (npc->indexX < 0 && npc->indexX > BALLX) return;
+
+    for(n = 0; n <= 1; n++){
+        if((npc->indexY)%2 == n){
+            /*case 3*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color && ballgrid[(npc->indexY)+1][(npc->indexX)+n].remain == 0){
+                checkIsland (&ballgrid[(npc->indexY)+1][(npc->indexX)+n]);
+            }
+            /*case 1*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color && ballgrid[(npc->indexY)-1][(npc->indexX)+n].remain == 0){
+                checkIsland (&ballgrid[(npc->indexY)-1][(npc->indexX)+n]);
+            }
+            /*case 6*/
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color && ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].remain == 0){
+                checkIsland (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1]);
+            }
+            /*case 4*/
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color && ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].remain == 0){
+                checkIsland (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1]);
+            }
+        }
+    }
+    /*case 2*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)-1].color && ballgrid[(npc->indexY)][(npc->indexX)-1].remain == 0){
+        checkIsland (&ballgrid[(npc->indexY)][(npc->indexX)-1]);
+    }
+    /*case 5*/
+    if(ballgrid[(npc->indexY)][(npc->indexX)+1].color && ballgrid[(npc->indexY)][(npc->indexX)+1].remain == 0){
+        checkIsland (&ballgrid[(npc->indexY)][(npc->indexX)+1]);
+    }
+
+	return ;
+}
+
+
 void checkAround(NPC* npc, int checkcolor)
 {
     int n;
@@ -1022,6 +1078,7 @@ void checkAround(NPC* npc, int checkcolor)
 void checkDestruction(NPC* npc, int checkcolor)
 {
     int n;
+    int j;
     static int currentCount = 0;
     currentCount++;
     printf("currentCount = %d\n", currentCount);
@@ -1040,6 +1097,13 @@ void checkDestruction(NPC* npc, int checkcolor)
         printf("ballCount = %d\n", ballCount);
         ballCount = 0;
         checkAround(destructionStart,destructionStart->color);
+        for(j = 1; j<GRIDX; j++){
+            if (ballgrid[1][j].color){
+                checkIsland(&ballgrid[1][j]);
+                DestroyIsland();
+            }
+
+        }
         destructionStart = NULL;
         currentCount = 0;
         return;
@@ -1090,4 +1154,17 @@ void checkDestruction(NPC* npc, int checkcolor)
 
 
 	return ;
+}
+
+void DestroyIsland(){
+    int i, j;
+    for (i=1; i<GRIDY; i++)
+        for(j=1; j<GRIDX; j++){
+            if (ballgrid[i][j].remain)
+                ballgrid[i][j].remain = 0;
+            else{
+                ballgrid[i][j].color = 0;
+                /*SDL_FreeSurface(ballgrid[i][j].image);*/
+            }
+        }
 }
