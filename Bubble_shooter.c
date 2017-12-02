@@ -274,7 +274,7 @@ NPC* collision()
         }
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
         ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-        /*printGrid();*/
+        printGrid();
         ball.stepY = 0;
         ball.stepX = 0;
         clicked = 0;
@@ -316,6 +316,7 @@ NPC* CeilingCollision()
 
       ballCount = 0;
       checkDestruction(&ballgrid[1][newX], ballgrid[1][newX].color);
+      /*DestroyIsland();*/
       drawNPC(ballgrid[1][newX]);
       ballcolor = rand() % COLORS + 1;
       ball.color = ballcolor;
@@ -492,10 +493,15 @@ NPC* NPCCollision()
 
         ballCount = 0;
         checkDestruction(newNPC, newNPC->color);
+        /*DestroyIsland();*/
 		colNPC->coltype = 0;
         if (newNPC->color == 0){
             newNPC->centerX = 0;
             newNPC->centerY = 0;
+            newNPC->posX = 0;
+            newNPC->posY = 0;
+            newNPC->indexX = 0;
+            newNPC-> indexY = 0;
         }
 		ballcolor = rand() % COLORS + 1;
 		ball.color = ballcolor;
@@ -961,8 +967,8 @@ void printGrid(){
     int i, j;
     for(i=0; i<20; i++){
         for(j=0; j<=19; j++){
-            if(i%2==0) printf(" %d", ballgrid[i][j].indexX);
-            else printf("%d ", ballgrid[i][j].indexX);
+            if(i%2==0) printf(" %d", ballgrid[i][j].remain);
+            else printf("%d ", ballgrid[i][j].remain);
         }
         printf("\n");
     }
@@ -1212,6 +1218,7 @@ void checkDestruction(NPC* npc, int checkcolor)
             }
         }
         DestroyIsland();
+        printGrid();
         destructionStart = NULL;
         currentCount = 0;
         return;
@@ -1267,21 +1274,21 @@ void checkDestruction(NPC* npc, int checkcolor)
 void DestroyIsland(){
     int i, j;
     i = j = 0;
-    printGrid();
     for (i=1; i<GRIDY; i++)
         for(j=1; j<GRIDX; j++){
-            if (ballgrid[i][j].remain == 1 && ballgrid[i][j].color)
-                ballgrid[i][j].remain = 0;
-            else if (ballgrid[i][j].color){
-                SDL_Delay(25);
-                RefreshScreen();
+            if (ballgrid[i][j].remain == 0){
+                if (ballgrid[i][j].color){
+                    SDL_Delay(25);
+                    RefreshScreen();
+                }
                 ballgrid[i][j].color = 0;
                 ballgrid[i][j].posX = 0;
                 ballgrid[i][j].posY = 0;
                 ballgrid[i][j].centerX = 0;
                 ballgrid[i][j].centerY = 0;
-                /*SDL_FreeSurface(ballgrid[i][j].image);*/
+                ballgrid[i][j].indexX = 0;
+                ballgrid[i][j].indexY = 0;
             }
-
+            ballgrid[i][j].remain = 0;
         }
 }
