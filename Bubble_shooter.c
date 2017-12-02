@@ -38,7 +38,7 @@ const int BORDER = 24;
 const int MSPEED = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 5;
+const int COLORS = 2;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -1171,12 +1171,16 @@ void checkDestruction(NPC* npc, int checkcolor)
 
 void DestroyIsland(){
     int i, j;
-    printf("a");
     for (i=1; i<BALLY-1; i++)
         for(j=1; j<BALLX-1; j++){
-            if (ballgrid[i][j].remain)
+            if (ballgrid[i][j].remain){
                 ballgrid[i][j].remain = 0;
+            }
             else{
+                if (ballgrid[i][j].color){
+                    SDL_Delay(25);
+                    RefreshScreen();
+                }
                 ballgrid[i][j].color = 0;
                 /*SDL_FreeSurface(ballgrid[i][j].image);*/
             }
