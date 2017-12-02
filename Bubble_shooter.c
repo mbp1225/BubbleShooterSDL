@@ -38,7 +38,7 @@ const int BORDER = 24;
 const int MSPEED = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 3;
+const int COLORS = 5;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -98,6 +98,7 @@ typedef struct _NPC
 
 int clicked = 0;
 int quit = 0;
+int health;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
@@ -147,8 +148,8 @@ PLAYER createPLAYER( float posX, float posY, float stepX, float stepY, int color
 /*Create NPC*/
 NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image);
 
-/*Clears NPC*/
-void clearNPC(NPC *n);
+/*Prepares grid*/
+void prepareGrid();
 
 /*Create grid*/
 void createGrid(int ballY, int ballX);
@@ -262,22 +263,13 @@ NPC* collision()
         n = CeilingCollision();
 
     if (n != NULL){
-        if(n->color != 0){
-            n->centerX = n->posX + IMAGE_WIDTH/2;
-            n->centerY = n->posY + IMAGE_HEIGHT/2;
-        }
-        else{
-            n->posX = 0;
-            n->posY = 0;
-            n->centerX = 0;
-            n->centerY = 0;
-        }
+        /*printGrid();*/
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
         ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
-        printGrid();
         ball.stepY = 0;
         ball.stepX = 0;
         clicked = 0;
+        health--;
     }
 
     return n;
@@ -316,7 +308,6 @@ NPC* CeilingCollision()
 
       ballCount = 0;
       checkDestruction(&ballgrid[1][newX], ballgrid[1][newX].color);
-      /*DestroyIsland();*/
       drawNPC(ballgrid[1][newX]);
       ballcolor = rand() % COLORS + 1;
       ball.color = ballcolor;
@@ -360,18 +351,15 @@ NPC* checkCollision()
                   */
                   if (ball.centerX > ballgrid[i][j].centerX)
                   {
-                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 1;
-                    else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY + 1) ballgrid[i][j].coltype = 3;
+                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY +1) ballgrid[i][j].coltype = 1;
+                    else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY+1) ballgrid[i][j].coltype = 3;
                     else ballgrid[i][j].coltype = 2;
                   }
 
                   else
                   {
                     if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 6;
-                    else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY + 1) {
-                        ballgrid[i][j].coltype = 4;
-                        printf("@@ ball.centerY = %f\n@@ type4 = %f\n", ball.centerY, (IMAGE_HEIGHT/3)*2 + ballgrid[i][j].posY);
-                    }
+                    else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY+1) ballgrid[i][j].coltype = 4;
                     else ballgrid[i][j].coltype = 5;
                   }
 
@@ -493,16 +481,7 @@ NPC* NPCCollision()
 
         ballCount = 0;
         checkDestruction(newNPC, newNPC->color);
-        /*DestroyIsland();*/
 		colNPC->coltype = 0;
-        if (newNPC->color == 0){
-            newNPC->centerX = 0;
-            newNPC->centerY = 0;
-            newNPC->posX = 0;
-            newNPC->posY = 0;
-            newNPC->indexX = 0;
-            newNPC-> indexY = 0;
-        }
 		ballcolor = rand() % COLORS + 1;
 		ball.color = ballcolor;
 		ball.image = GetColor(ballcolor);
@@ -531,7 +510,9 @@ PLAYER createPLAYER( float posX, float posY,
 }
 
 /*Create NPC*/
-NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image)
+NPC createNPC(float posY, float posX,
+			  int indexY, int indexX,
+			  int color, SDL_Surface *image)
 {
 	NPC n;
 
@@ -548,20 +529,6 @@ NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Sur
 
 	return n;
 
-}
-
-void clearNPC(NPC* n)
-{
-    n-> posX = 0;
-    n-> posY = 0;
-    n-> indexY = 0;
-    n-> indexX = 0;
-    n-> color = 0;
-    n-> centerX = 0;
-    n-> centerY = 0;
-    n-> coltype = 0;
-    n-> remain = 0;
-    SDL_FreeSurface( n->image );
 }
 
 /*makes BACKGROUND*/
@@ -619,34 +586,21 @@ void createGrid(int ballY, int ballX)
     int ballcolor;
     SDL_Surface* BallSurface;
 
-    /*CRIANDO TETO COM FALSOS NPC'S DE COR -1*/
-    for(j=1; j < ballX; j++){
-        ballgrid[0][j] = createNPC(
-            0,
-            j*IMAGE_WIDTH - IMAGE_WIDTH/4,
-            0,
-            j,
-            -1,
-            NULL
-        );
-        ballgrid[0][j].remain = 1;
-    }
-
-    /*CRIANDO MATRIZ COM NPCs ALEATÓRIOS*/
+    /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
 	for (i = 1; i < ballY; i++)
 	{
 		for (j=1; j < ballX; j++)
 		{
-		ballcolor = rand() % COLORS + 1;
-    	BallSurface = GetColor(ballcolor);
-		ballgrid[i][j] = createNPC(
-			i*(IMAGE_HEIGHT - 5),
-			j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
-			i,
-			j,
-            ballcolor,
-			BallSurface
-      );
+			ballcolor = rand() % COLORS + 1;
+    		BallSurface = GetColor(ballcolor);
+			ballgrid[i][j] = createNPC(
+				i*(IMAGE_HEIGHT - 5),
+				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
+				i,
+				j,
+                ballcolor,
+				BallSurface
+            );
 			drawNPC(ballgrid[i][j]);
 		}
 	}
@@ -796,14 +750,11 @@ void game(){
 		collision();
         /*checkAround(n);*/
 	}
-    /*
+
     if (!health){
-		newline();
+		gridDown();
         health = 5;
     }
-
-    newball();
-}*/
 
     RefreshScreen();
 }
@@ -967,8 +918,8 @@ void printGrid(){
     int i, j;
     for(i=0; i<20; i++){
         for(j=0; j<=19; j++){
-            if(i%2==0) printf(" %d", ballgrid[i][j].remain);
-            else printf("%d ", ballgrid[i][j].remain);
+            if(i%2==0) printf("%d ", ballgrid[i][j].remain);
+            else printf(" %d", ballgrid[i][j].remain);
         }
         printf("\n");
     }
@@ -982,26 +933,20 @@ void gridDown()
 	{
 		for (j=1; j < BALLX-1; j++)
 		{
-			ballgrid[i+1][j] = createNPC(
-				(i+1)*(IMAGE_HEIGHT - 5),
-				j*IMAGE_WIDTH + ((i+1)%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
-				i+1,
-				j,
-                ballgrid[i][j].color,
-				GetColor(ballgrid[i][j].color)
-            );
-            ballgrid[i+1][j].centerX = ballgrid[i+1][j].posX + IMAGE_WIDTH/2;
-            ballgrid[i+1][j].centerY = ballgrid[i+1][j].posY + IMAGE_HEIGHT/2;
-            if(ballgrid[i+1][j].color == 0){
-                ballgrid[i+1][j].posX = 0;
-                ballgrid[i+1][j].posY = 0;
-                ballgrid[i+1][j].centerX = 0;
-                ballgrid[i+1][j].centerY = 0;
-                ballgrid[i+1][j].indexX = 0;
-                ballgrid[i+1][j].indexY = 0;
+            if (ballgrid[i][j].color){
+                SDL_FreeSurface(ballgrid[i][j].image);
+    			ballgrid[i+1][j] = createNPC(
+    				(i+1)*(IMAGE_HEIGHT - 5),
+    				j*IMAGE_WIDTH + ((i+1)%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
+    				i+1,
+    				j,
+                    ballgrid[i][j].color,
+    				GetColor(ballgrid[i][j].color)
+                );
+                ballgrid[i][j].color = 0;
+                printf("Ball Created\n");
+    			drawNPC(ballgrid[i+1][j]);
             }
-            printf("Ball Created\n");
-			drawNPC(ballgrid[i+1][j]);
 		}
 	}
     for (j=1; j < BALLX-1; j++)
@@ -1016,16 +961,16 @@ void gridDown()
             ballcolor,
             BallSurface
         );
-        ballgrid[1][j].centerX = ballgrid[1][j].posX + IMAGE_WIDTH/2;
-        ballgrid[1][j].centerY = ballgrid[1][j].posY + IMAGE_HEIGHT/2;
-        if(ballgrid[1][j].color == 0){
-            ballgrid[1][j].posX = 0;
-            ballgrid[1][j].posY = 0;
-            ballgrid[1][j].centerX = 0;
-            ballgrid[1][j].centerY = 0;
-        }
         drawNPC(ballgrid[1][j]);
     }
+    for(j = 1; j<GRIDX; j++){
+        if (ballgrid[1][j].color){
+            checkIsland(&ballgrid[1][j]);
+        }
+
+    }
+    printGrid();
+    DestroyIsland();
 }
 
 void checkIsland(NPC* npc)
@@ -1046,29 +991,29 @@ void checkIsland(NPC* npc)
     for(n = 0; n <= 1; n++){
         if((npc->indexY)%2 == n){
             /*case 3*/
-            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color != 0 && ballgrid[(npc->indexY)+1][(npc->indexX)+n].remain == 0){
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color && ballgrid[(npc->indexY)+1][(npc->indexX)+n].remain == 0){
                 checkIsland (&ballgrid[(npc->indexY)+1][(npc->indexX)+n]);
             }
             /*case 1*/
-            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color != 0 && ballgrid[(npc->indexY)-1][(npc->indexX)+n].remain == 0){
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color && ballgrid[(npc->indexY)-1][(npc->indexX)+n].remain == 0){
                 checkIsland (&ballgrid[(npc->indexY)-1][(npc->indexX)+n]);
             }
             /*case 6*/
-            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color != 0 && ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].remain == 0){
+            if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color && ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].remain == 0){
                 checkIsland (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1]);
             }
             /*case 4*/
-            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color != 0 && ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].remain == 0){
+            if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color && ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].remain == 0){
                 checkIsland (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1]);
             }
         }
     }
     /*case 2*/
-    if(ballgrid[(npc->indexY)][(npc->indexX)-1].color != 0 && ballgrid[(npc->indexY)][(npc->indexX)-1].remain == 0){
+    if(ballgrid[(npc->indexY)][(npc->indexX)-1].color && ballgrid[(npc->indexY)][(npc->indexX)-1].remain == 0){
         checkIsland (&ballgrid[(npc->indexY)][(npc->indexX)-1]);
     }
     /*case 5*/
-    if(ballgrid[(npc->indexY)][(npc->indexX)+1].color != 0 && ballgrid[(npc->indexY)][(npc->indexX)+1].remain == 0){
+    if(ballgrid[(npc->indexY)][(npc->indexX)+1].color && ballgrid[(npc->indexY)][(npc->indexX)+1].remain == 0){
         checkIsland (&ballgrid[(npc->indexY)][(npc->indexX)+1]);
     }
 
@@ -1095,15 +1040,7 @@ void checkAround(NPC* npc, int checkcolor)
         if((npc->indexY)%2 == n){
             /*case 3*/
             if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color == checkcolor){
-                npc-> color = 0;
-                npc-> posX = 0;
-                npc-> posY = 0;
-                npc-> centerX = 0;
-                npc-> centerY = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n].posX = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n].posY = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n].centerX = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n].centerY = 0;
+                npc->color = 0;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n].image);
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n], checkcolor);
@@ -1111,14 +1048,6 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 1*/
             if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color == checkcolor){
                 npc->color = 0;
-                npc-> posX = 0;
-                npc-> posY = 0;
-                npc-> centerX = 0;
-                npc-> centerY = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n].posX = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n].posY = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n].centerX = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n].centerY = 0;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n].image);
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n], checkcolor);
@@ -1126,14 +1055,6 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 6*/
             if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color == checkcolor){
                 npc->color = 0;
-                npc-> posX = 0;
-                npc-> posY = 0;
-                npc-> centerX = 0;
-                npc-> centerY = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].posX = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].posY = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].centerX = 0;
-                ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].centerY = 0;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].image);
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1], checkcolor);
@@ -1141,14 +1062,6 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 4*/
             if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color == checkcolor){
                 npc->color = 0;
-                npc-> posX = 0;
-                npc-> posY = 0;
-                npc-> centerX = 0;
-                npc-> centerY = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].posX = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].posY = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].centerX = 0;
-                ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].centerY = 0;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].image);
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1], checkcolor);
@@ -1158,30 +1071,14 @@ void checkAround(NPC* npc, int checkcolor)
     /*case 2*/
     if(ballgrid[(npc->indexY)][(npc->indexX)-1].color == checkcolor){
         npc->color = 0;
-        npc-> posX = 0;
-        npc-> posY = 0;
-        npc-> centerX = 0;
-        npc-> centerY = 0;
         ballgrid[(npc->indexY)][(npc->indexX)-1].color = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)-1].posX = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)-1].posY = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)-1].centerX = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)-1].centerY = 0;
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)-1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)-1], checkcolor);
     }
     /*case 5*/
     if(ballgrid[(npc->indexY)][(npc->indexX)+1].color == checkcolor){
         npc->color = 0;
-        npc-> posX = 0;
-        npc-> posY = 0;
-        npc-> centerX = 0;
-        npc-> centerY = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)+1].color = 0;;
-        ballgrid[(npc->indexY)][(npc->indexX)+1].posX = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)+1].posY = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)+1].centerX = 0;
-        ballgrid[(npc->indexY)][(npc->indexX)+1].centerY = 0;
+        ballgrid[(npc->indexY)][(npc->indexX)+1].color = 0;
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
     }
@@ -1212,15 +1109,16 @@ void checkDestruction(NPC* npc, int checkcolor)
         ballCount = 0;
         checkAround(destructionStart,destructionStart->color);
         for(j = 1; j<GRIDX; j++){
-            if (ballgrid[1][j].color != 0){
+            if (ballgrid[1][j].color){
                 checkIsland(&ballgrid[1][j]);
-                printGrid();
             }
+
         }
-        DestroyIsland();
         printGrid();
+        DestroyIsland();
         destructionStart = NULL;
         currentCount = 0;
+        health++;
         return;
     }
     /*
@@ -1273,22 +1171,15 @@ void checkDestruction(NPC* npc, int checkcolor)
 
 void DestroyIsland(){
     int i, j;
-    i = j = 0;
-    for (i=1; i<GRIDY; i++)
-        for(j=1; j<GRIDX; j++){
-            if (ballgrid[i][j].remain == 0){
-                if (ballgrid[i][j].color){
-                    SDL_Delay(25);
-                    RefreshScreen();
-                }
+    printf("a");
+    for (i=1; i<BALLY-1; i++)
+        for(j=1; j<BALLX-1; j++){
+            if (ballgrid[i][j].remain)
+                ballgrid[i][j].remain = 0;
+            else{
                 ballgrid[i][j].color = 0;
-                ballgrid[i][j].posX = 0;
-                ballgrid[i][j].posY = 0;
-                ballgrid[i][j].centerX = 0;
-                ballgrid[i][j].centerY = 0;
-                ballgrid[i][j].indexX = 0;
-                ballgrid[i][j].indexY = 0;
+                /*SDL_FreeSurface(ballgrid[i][j].image);*/
             }
-            ballgrid[i][j].remain = 0;
         }
+    printGrid();
 }
