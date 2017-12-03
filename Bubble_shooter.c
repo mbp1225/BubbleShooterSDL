@@ -547,7 +547,7 @@ BACKGROUND  makeBACKGROUND()
     3 = neptune
     4 = turquoise
     5 = jupiter
-    6 = pink
+    6 = mars
 */
 
 SDL_Surface* GetColor(int color)
@@ -572,7 +572,7 @@ SDL_Surface* GetColor(int color)
             ColorSurface = loadSurface( "./Images/jupiter.png" );
             break;
         case 6:
-            ColorSurface = loadSurface( "./Images/pink.png" );
+            ColorSurface = loadSurface( "./Images/mars.png" );
             break;
     }
 
