@@ -265,7 +265,7 @@ NPC* collision()
     if (n != NULL){
         /*printGrid();*/
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3;
         ball.stepY = 0;
         ball.stepX = 0;
         clicked = 0;
@@ -545,7 +545,7 @@ BACKGROUND  makeBACKGROUND()
     1 = earth
     2 = moon
     3 = neptune
-    4 = turquoise
+    4 = uranus
     5 = jupiter
     6 = mars
 */
@@ -566,7 +566,7 @@ SDL_Surface* GetColor(int color)
             ColorSurface = loadSurface( "./Images/neptune.png" );
             break;
         case 4:
-            ColorSurface = loadSurface( "./Images/turquoise.png" );
+            ColorSurface = loadSurface( "./Images/uranus.png" );
             break;
         case 5:
             ColorSurface = loadSurface( "./Images/jupiter.png" );
@@ -905,7 +905,7 @@ int PrepareGame()
   /*Create PLAYER*/
 
   ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                   (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                   (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3,
                     0,
                     0,
                     ballcolor,
@@ -918,8 +918,8 @@ void printGrid(){
     int i, j;
     for(i=0; i<BALLX; i++){
         for(j=0; j<=BALLY; j++){
-            if(i%2==0) printf("%d ", ballgrid[i][j].remain);
-            else printf(" %d", ballgrid[i][j].remain);
+            if(i%2==0) printf("%d ", ballgrid[i][j].color);
+            else printf(" %d", ballgrid[i][j].color);
         }
         printf("\n");
     }
