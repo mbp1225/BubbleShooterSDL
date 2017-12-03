@@ -38,7 +38,7 @@ const int BORDER = 24;
 const int MSPEED = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 2;
+const int COLORS = 6;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -741,7 +741,7 @@ void game(){
                 break;
             }
         }
-        else if (e.button.button == SDL_BUTTON_LEFT && !clicked) shoot();
+        else if ((e.type == SDL_MOUSEBUTTONDOWN) && e.button.button == SDL_BUTTON_LEFT && !clicked) shoot();
     }
 
     if(clicked)
@@ -916,8 +916,8 @@ int PrepareGame()
 
 void printGrid(){
     int i, j;
-    for(i=0; i<20; i++){
-        for(j=0; j<=19; j++){
+    for(i=0; i<BALLX; i++){
+        for(j=0; j<=BALLY; j++){
             if(i%2==0) printf("%d ", ballgrid[i][j].remain);
             else printf(" %d", ballgrid[i][j].remain);
         }
