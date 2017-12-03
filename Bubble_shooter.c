@@ -543,8 +543,8 @@ BACKGROUND  makeBACKGROUND()
     COLOR CODES
     0 = null
     1 = earth
-    2 = yellow
-    3 = green
+    2 = moon
+    3 = neptune
     4 = turquoise
     5 = jupiter
     6 = pink
@@ -560,10 +560,10 @@ SDL_Surface* GetColor(int color)
             ColorSurface = loadSurface( "./Images/earth.png" );
             break;
         case 2:
-            ColorSurface = loadSurface( "./Images/yellow.png" );
+            ColorSurface = loadSurface( "./Images/moon.png" );
             break;
         case 3:
-            ColorSurface = loadSurface( "./Images/green.png" );
+            ColorSurface = loadSurface( "./Images/neptune.png" );
             break;
         case 4:
             ColorSurface = loadSurface( "./Images/turquoise.png" );
