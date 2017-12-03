@@ -542,11 +542,11 @@ BACKGROUND  makeBACKGROUND()
 /*
     COLOR CODES
     0 = null
-    1 = red
+    1 = earth
     2 = yellow
     3 = green
     4 = turquoise
-    5 = blue
+    5 = jupiter
     6 = pink
 */
 
@@ -557,7 +557,7 @@ SDL_Surface* GetColor(int color)
     switch(color)
     {
         case 1:
-            ColorSurface = loadSurface( "./Images/red.png" );
+            ColorSurface = loadSurface( "./Images/earth.png" );
             break;
         case 2:
             ColorSurface = loadSurface( "./Images/yellow.png" );
@@ -569,7 +569,7 @@ SDL_Surface* GetColor(int color)
             ColorSurface = loadSurface( "./Images/turquoise.png" );
             break;
         case 5:
-            ColorSurface = loadSurface( "./Images/blue.png" );
+            ColorSurface = loadSurface( "./Images/jupiter.png" );
             break;
         case 6:
             ColorSurface = loadSurface( "./Images/pink.png" );
@@ -653,7 +653,7 @@ void RefreshScreen()
   /*Fill the surface white*/
 
   SDL_FillRect( gScreenSurface, NULL,
-  SDL_MapRGB( gScreenSurface->format, 0xFF, 0xFF, 0xFF ) );
+  SDL_MapRGBA( BallSurface->format, 0x00, 0x00, 0x00, 0xFF ));
 
   drawBACKGROUND(backg);
 
@@ -863,7 +863,7 @@ SDL_Surface* loadSurface( char *path )
 
         else
         {
-            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0, 0, 0, 0xFF);
+            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0x00, 0, 0, 0xFF);
             SDL_SetColorKey( optimizedSurface,1, colorkey );
         }
 
