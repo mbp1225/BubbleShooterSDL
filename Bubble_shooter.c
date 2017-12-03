@@ -535,7 +535,7 @@ NPC createNPC(float posY, float posX,
 BACKGROUND  makeBACKGROUND()
 {
   BACKGROUND b;
-  b.image = loadSurface( "./Images/bg.png" );
+  b.image = loadSurface( "./Images/BG.png" );
   return b;
 }
 
@@ -557,22 +557,22 @@ SDL_Surface* GetColor(int color)
     switch(color)
     {
         case 1:
-            ColorSurface = loadSurface( "./Images/earth.png" );
+            ColorSurface = loadSurface( "./Images/Earth.png" );
             break;
         case 2:
-            ColorSurface = loadSurface( "./Images/moon.png" );
+            ColorSurface = loadSurface( "./Images/Saturn.png" );
             break;
         case 3:
-            ColorSurface = loadSurface( "./Images/neptune.png" );
+            ColorSurface = loadSurface( "./Images/Neptune.png" );
             break;
         case 4:
-            ColorSurface = loadSurface( "./Images/uranus.png" );
+        ColorSurface = loadSurface( "./Images/Venus.png" );
             break;
         case 5:
-            ColorSurface = loadSurface( "./Images/jupiter.png" );
+            ColorSurface = loadSurface( "./Images/Jupiter.png" );
             break;
         case 6:
-            ColorSurface = loadSurface( "./Images/mars.png" );
+            ColorSurface = loadSurface( "./Images/Mars.png" );
             break;
     }
 
