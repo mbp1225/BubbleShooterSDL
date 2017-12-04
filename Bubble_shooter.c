@@ -35,13 +35,13 @@ const int SCREEN_HEIGHT = 480;
 const int BORDER = 24;
 
 /*Ball moving speed*/
-const int MSPEED = 8;
+const int MSPEED = 14;
 
 /*Ball collision radius*/
 const int COLRADIUS = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 2;
+const int COLORS = 6;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -669,7 +669,7 @@ void RefreshScreen()
   SDL_UpdateWindowSurface( gWindow );
 
   /* Not so good solution, depends on your computer*/
-  SDL_Delay(5);
+  SDL_Delay(1);
 }
 
 
@@ -754,7 +754,7 @@ void game(){
 	}
 
     if (!health){
-	    /*gridDown();*/
+	    gridDown();
         health = 5;
     }
 
@@ -920,8 +920,8 @@ void printGrid(){
     int i, j;
     for(i=0; i<BALLY; i++){
         for(j=0; j<BALLX; j++){
-            if(i%2==0) printf("%2d ", ballgrid[i][j].indexX);
-            else printf(" %2d", ballgrid[i][j].indexX);
+            if(i%2==0) printf("%d ", ballgrid[i][j].color);
+            else printf(" %d", ballgrid[i][j].color);
         }
         printf("\n");
     }
@@ -931,6 +931,7 @@ void printGrid(){
 void gridDown()
 {
     int i, j, ballcolor;
+    SDL_Delay(50);
 
     for (i = BALLY-1; i > 0; i--)
 	{
