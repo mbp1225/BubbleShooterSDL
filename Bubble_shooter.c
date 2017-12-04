@@ -34,11 +34,14 @@ const int SCREEN_HEIGHT = 480;
 /*Border Width*/
 const int BORDER = 24;
 
-/*Velocidade da bolha*/
+/*Ball moving speed*/
 const int MSPEED = 8;
 
+/*Ball collision radius*/
+const int COLRADIUS = 8;
+
 /*Amount of different colors for the balls*/
-const int COLORS = 6;
+const int COLORS = 2;
 
 /*Quantidade de bolhas total*/
 const int BALLX = 20;
@@ -261,7 +264,6 @@ NPC* collision()
     /*Checks if there's any ceiling collision for it inside the function*/
     if (n == NULL)
         n = CeilingCollision();
-
     if (n != NULL){
         /*printGrid();*/
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
@@ -336,7 +338,7 @@ NPC* checkCollision()
             ballgrid[i][j].distY = distY;
             ballgrid[i][j].dist = dist;
 
-            if (dist < IMAGE_WIDTH - 6)
+            if (dist < IMAGE_WIDTH - COLRADIUS)
             {
                 /*if(ball.color == ballgrid[i][j].color){*/
 
@@ -752,7 +754,7 @@ void game(){
 	}
 
     if (!health){
-		gridDown();
+	    gridDown();
         health = 5;
     }
 
@@ -931,7 +933,7 @@ void gridDown()
 
     for (i = BALLY-1; i > 0; i--)
 	{
-		for (j=1; j < BALLX-1; j++)
+		for (j=1; j < GRIDX-1; j++)
 		{
             if (ballgrid[i][j].color){
                 SDL_FreeSurface(ballgrid[i][j].image);
@@ -949,7 +951,7 @@ void gridDown()
             }
 		}
 	}
-    for (j=1; j < BALLX-1; j++)
+    for (j=1; j < GRIDX-1; j++)
     {
         ballcolor = rand() % COLORS + 1;
         BallSurface = GetColor(ballcolor);
@@ -963,7 +965,7 @@ void gridDown()
         );
         drawNPC(ballgrid[1][j]);
     }
-    for(j = 1; j<GRIDX; j++){
+    for(j = 1; j<GRIDX-1; j++){
         if (ballgrid[1][j].color){
             checkIsland(&ballgrid[1][j]);
         }
@@ -1172,7 +1174,7 @@ void checkDestruction(NPC* npc, int checkcolor)
 void DestroyIsland(){
     int i, j;
     for (i=1; i<BALLY-1; i++)
-        for(j=1; j<BALLX-1; j++){
+        for(j=1; j<GRIDX-1; j++){
             if (ballgrid[i][j].remain){
                 ballgrid[i][j].remain = 0;
             }
