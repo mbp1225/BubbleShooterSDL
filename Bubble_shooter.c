@@ -265,7 +265,7 @@ NPC* collision()
     if (n != NULL){
         /*printGrid();*/
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3;
+        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
         ball.stepY = 0;
         ball.stepX = 0;
         clicked = 0;
@@ -863,7 +863,7 @@ SDL_Surface* loadSurface( char *path )
 
         else
         {
-            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0x00, 0, 0, 0xFF);
+            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0x00, 0x00, 0x00, 0xFF);
             SDL_SetColorKey( optimizedSurface,1, colorkey );
         }
 
@@ -905,7 +905,7 @@ int PrepareGame()
   /*Create PLAYER*/
 
   ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                   (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3,
+                   (SCREEN_HEIGHT - IMAGE_HEIGHT),
                     0,
                     0,
                     ballcolor,
