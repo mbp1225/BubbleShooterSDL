@@ -342,9 +342,9 @@ NPC* checkCollision()
             {
                 /*if(ball.color == ballgrid[i][j].color){*/
 
-                printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j);
+                /* printf("Ball color: %d\nBall Index: %d\n",ballgrid[i][j].color,j); */
 
-                printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[i][j].centerY, ball.centerY);
+                /* printf("ballgrid centerY = %f\nplayer centerY = %f\n", ballgrid[i][j].centerY, ball.centerY);*/
                   /*
                     COLTYPE CODES:
                          6 1
@@ -365,8 +365,8 @@ NPC* checkCollision()
                     else ballgrid[i][j].coltype = 5;
                   }
 
-                  printf("coltype = %d\n", ballgrid[i][j].coltype);
-                  printf("player center: %f ballij center: %f\n", ball.centerX, ballgrid[i][j].centerX);
+                  /* printf("coltype = %d\n", ballgrid[i][j].coltype); */
+                  /* printf("player center: %f ballij center: %f\n", ball.centerX, ballgrid[i][j].centerX); */
                   return &ballgrid[i][j];
               }
           }
@@ -735,7 +735,7 @@ void game(){
         {
             switch( e.key.keysym.sym )
             {
-                case SDLK_UP: printf("UP\n");
+                case SDLK_UP: /* printf("UP\n"); */
                 break;
                 case SDLK_DOWN: gridDown();
                 break;
@@ -754,7 +754,7 @@ void game(){
 	}
 
     if (!health){
-	    gridDown();
+	    /*gridDown();*/
         health = 5;
     }
 
@@ -918,13 +918,14 @@ int PrepareGame()
 
 void printGrid(){
     int i, j;
-    for(i=0; i<BALLX; i++){
-        for(j=0; j<=BALLY; j++){
-            if(i%2==0) printf("%d ", ballgrid[i][j].color);
-            else printf(" %d", ballgrid[i][j].color);
+    for(i=0; i<BALLY; i++){
+        for(j=0; j<BALLX; j++){
+            if(i%2==0) printf("%2d ", ballgrid[i][j].indexX);
+            else printf(" %2d", ballgrid[i][j].indexX);
         }
         printf("\n");
     }
+    printf("---\n");
 }
 
 void gridDown()
@@ -933,7 +934,7 @@ void gridDown()
 
     for (i = BALLY-1; i > 0; i--)
 	{
-		for (j=1; j < GRIDX-1; j++)
+		for (j=1; j < GRIDX; j++)
 		{
             if (ballgrid[i][j].color){
                 SDL_FreeSurface(ballgrid[i][j].image);
@@ -946,12 +947,13 @@ void gridDown()
     				GetColor(ballgrid[i][j].color)
                 );
                 ballgrid[i][j].color = 0;
-                printf("Ball Created\n");
+                /* printf("Ball Created\n"); */
     			drawNPC(ballgrid[i+1][j]);
             }
 		}
 	}
-    for (j=1; j < GRIDX-1; j++)
+    /* ### */
+    for (j=1; j <= GRIDX; j++)
     {
         ballcolor = rand() % COLORS + 1;
         BallSurface = GetColor(ballcolor);
@@ -965,7 +967,8 @@ void gridDown()
         );
         drawNPC(ballgrid[1][j]);
     }
-    for(j = 1; j<GRIDX-1; j++){
+    ballgrid[1][GRIDX].color = 0;
+    for(j = 1; j<GRIDX; j++){
         if (ballgrid[1][j].color){
             checkIsland(&ballgrid[1][j]);
         }
@@ -979,7 +982,7 @@ void checkIsland(NPC* npc)
 {
     int n;
     npc->remain = 1;
-    printf("AA\n");
+    /* printf("AA\n"); */
 
     /*
       COLTYPE CODES:
@@ -1094,7 +1097,7 @@ void checkDestruction(NPC* npc, int checkcolor)
     int j;
     static int currentCount = 0;
     currentCount++;
-    printf("currentCount = %d\n", currentCount);
+    /* printf("currentCount = %d\n", currentCount); */
 
     if (ballCount == 0)
     {
@@ -1107,7 +1110,7 @@ void checkDestruction(NPC* npc, int checkcolor)
     }
     else if (ballCount > 2)
     {
-        printf("ballCount = %d\n", ballCount);
+        /* printf("ballCount = %d\n", ballCount); */
         ballCount = 0;
         checkAround(destructionStart,destructionStart->color);
         for(j = 1; j<GRIDX; j++){
@@ -1174,7 +1177,7 @@ void checkDestruction(NPC* npc, int checkcolor)
 void DestroyIsland(){
     int i, j;
     for (i=1; i<BALLY-1; i++)
-        for(j=1; j<GRIDX-1; j++){
+        for(j=1; j<GRIDX; j++){
             if (ballgrid[i][j].remain){
                 ballgrid[i][j].remain = 0;
             }
@@ -1183,6 +1186,12 @@ void DestroyIsland(){
                     SDL_Delay(25);
                     RefreshScreen();
                 }
+                ballgrid[i][j].indexX = 0;
+                ballgrid[i][j].indexY = 0;
+                ballgrid[i][j].posX = 0;
+                ballgrid[i][j].posY = 0;
+                ballgrid[i][j].centerX = 0;
+                ballgrid[i][j].centerY = 0;
                 ballgrid[i][j].color = 0;
                 /*SDL_FreeSurface(ballgrid[i][j].image);*/
             }
