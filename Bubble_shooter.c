@@ -265,7 +265,7 @@ NPC* collision()
     if (n != NULL){
         /*printGrid();*/
         ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
-        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+        ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3;
         ball.stepY = 0;
         ball.stepX = 0;
         clicked = 0;
@@ -535,7 +535,7 @@ NPC createNPC(float posY, float posX,
 BACKGROUND  makeBACKGROUND()
 {
   BACKGROUND b;
-  b.image = loadSurface( "./Images/BG.png" );
+  b.image = loadSurface( "./Images/bg.png" );
   return b;
 }
 
@@ -557,22 +557,22 @@ SDL_Surface* GetColor(int color)
     switch(color)
     {
         case 1:
-            ColorSurface = loadSurface( "./Images/Earth.png" );
+            ColorSurface = loadSurface( "./Images/earth.png" );
             break;
         case 2:
-            ColorSurface = loadSurface( "./Images/Saturn.png" );
+            ColorSurface = loadSurface( "./Images/moon.png" );
             break;
         case 3:
-            ColorSurface = loadSurface( "./Images/Neptune.png" );
+            ColorSurface = loadSurface( "./Images/neptune.png" );
             break;
         case 4:
-        ColorSurface = loadSurface( "./Images/Venus.png" );
+            ColorSurface = loadSurface( "./Images/uranus.png" );
             break;
         case 5:
-            ColorSurface = loadSurface( "./Images/Jupiter.png" );
+            ColorSurface = loadSurface( "./Images/jupiter.png" );
             break;
         case 6:
-            ColorSurface = loadSurface( "./Images/Mars.png" );
+            ColorSurface = loadSurface( "./Images/mars.png" );
             break;
     }
 
@@ -863,7 +863,7 @@ SDL_Surface* loadSurface( char *path )
 
         else
         {
-            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0x00, 0x00, 0x00, 0xFF);
+            Uint32 colorkey = SDL_MapRGBA( optimizedSurface->format, 0x00, 0, 0, 0xFF);
             SDL_SetColorKey( optimizedSurface,1, colorkey );
         }
 
@@ -905,7 +905,7 @@ int PrepareGame()
   /*Create PLAYER*/
 
   ball = createPLAYER((SCREEN_WIDTH/2 - IMAGE_WIDTH/2),
-                   (SCREEN_HEIGHT - IMAGE_HEIGHT),
+                   (SCREEN_HEIGHT - IMAGE_HEIGHT) - IMAGE_HEIGHT/3,
                     0,
                     0,
                     ballcolor,
