@@ -114,6 +114,7 @@ int clicked = 0;
 int quit = 0;
 int health = 0;
 int maxhealth = 0;
+unsigned int Score;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
@@ -210,7 +211,7 @@ void checkDestruction(NPC* npc, int checkcolor);
 void checkIsland(NPC* npc);
 
 /*Destroys Islands*/
-void DestroyIsland();
+void DestroyIsland(int ScoreOn);
 
 /*Prepares game initialization and variables*/
 int PrepareGame();
@@ -300,6 +301,7 @@ NPC* collision()
         clicked = 0;
         health--;
         printGrid();
+        printf("Score = %u\n", Score);
     }
 
     return n;
@@ -980,6 +982,8 @@ int PrepareGame()
   /*Create Background*/
   backg = makeBACKGROUND();
 
+  Score = 0;
+
   /*Create Ball Grid*/
   createGrid(GRIDY, GRIDX);
 
@@ -1087,7 +1091,7 @@ void gridDown()
 
     }
     /*printGrid();*/
-    DestroyIsland();
+    DestroyIsland(false);
 }
 
 void checkIsland(NPC* npc)
@@ -1141,6 +1145,7 @@ void checkIsland(NPC* npc)
 void checkAround(NPC* npc, int checkcolor)
 {
     int n;
+
     SDL_Delay(25);
     RefreshScreen();
 
@@ -1151,13 +1156,16 @@ void checkAround(NPC* npc, int checkcolor)
            4 3
     */
 
-	if (npc->indexX < 0 && npc->indexX > BALLX) return;
+	if (npc->indexX < 0 && npc->indexX > BALLX){
+    return;
+  }
 
     for(n = 0; n <= 1; n++){
         if((npc->indexY)%2 == n){
             /*case 3*/
             if(ballgrid[(npc->indexY)+1][(npc->indexX)+n].color == checkcolor){
                 npc->color = 0;
+                Score += 20;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n].image);
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n], checkcolor);
@@ -1165,6 +1173,7 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 1*/
             if(ballgrid[(npc->indexY)-1][(npc->indexX)+n].color == checkcolor){
                 npc->color = 0;
+                Score += 20;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n].image);
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n], checkcolor);
@@ -1172,6 +1181,7 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 6*/
             if(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color == checkcolor){
                 npc->color = 0;
+                Score += 20;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].image);
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1], checkcolor);
@@ -1179,6 +1189,7 @@ void checkAround(NPC* npc, int checkcolor)
             /*case 4*/
             if(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color == checkcolor){
                 npc->color = 0;
+                Score += 20;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color = 0;
                 SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].image);
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1], checkcolor);
@@ -1188,6 +1199,7 @@ void checkAround(NPC* npc, int checkcolor)
     /*case 2*/
     if(ballgrid[(npc->indexY)][(npc->indexX)-1].color == checkcolor){
         npc->color = 0;
+        Score += 20;
         ballgrid[(npc->indexY)][(npc->indexX)-1].color = 0;
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)-1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)-1], checkcolor);
@@ -1195,6 +1207,7 @@ void checkAround(NPC* npc, int checkcolor)
     /*case 5*/
     if(ballgrid[(npc->indexY)][(npc->indexX)+1].color == checkcolor){
         npc->color = 0;
+        Score += 20;
         ballgrid[(npc->indexY)][(npc->indexX)+1].color = 0;
         SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
@@ -1226,6 +1239,7 @@ void checkDestruction(NPC* npc, int checkcolor)
     {
         /* printf("ballCount = %d\n", ballCount); */
         ballCount = 0;
+        Score -= 10;
         checkAround(destructionStart,destructionStart->color);
         for(j = 1; j<GRIDX; j++){
             if (ballgrid[1][j].color){
@@ -1234,7 +1248,7 @@ void checkDestruction(NPC* npc, int checkcolor)
 
         }
         /*printGrid();*/
-        DestroyIsland();
+        DestroyIsland(true);
         destructionStart = NULL;
         currentCount = 0;
         health++;
@@ -1289,7 +1303,7 @@ void checkDestruction(NPC* npc, int checkcolor)
 	return ;
 }
 
-void DestroyIsland(){
+void DestroyIsland(int ScoreOn){
     int i, j;
     for (i=1; i<BALLY-1; i++)
         for(j=1; j<GRIDX; j++){
@@ -1300,6 +1314,7 @@ void DestroyIsland(){
                 if (ballgrid[i][j].color){
                     SDL_Delay(25);
                     RefreshScreen();
+                    if(ScoreOn) Score += 100;
                 }
                 ballgrid[i][j].indexX = 0;
                 ballgrid[i][j].indexY = 0;
