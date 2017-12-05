@@ -131,6 +131,7 @@ UIELEMENT lifeballs[6];
 NPC ballgrid[20][20];
 
 int ballCount = 0;
+int currentCount = 0;
 
 /*Ball surface*/
 SDL_Surface* BallSurface;
@@ -298,6 +299,7 @@ NPC* collision()
         ball.stepX = 0;
         clicked = 0;
         health--;
+        printGrid();
     }
 
     return n;
@@ -335,6 +337,7 @@ NPC* CeilingCollision()
       ball.image = NULL;
 
       ballCount = 0;
+      currentCount = 0;
       checkDestruction(&ballgrid[1][newX], ballgrid[1][newX].color);
       drawNPC(ballgrid[1][newX]);
 
@@ -421,6 +424,7 @@ NPC* NPCCollision()
 
     if (colNPC)
     {
+      printf("Colidiu!\n");
         switch(colNPC->coltype)
         {
             case 1:
@@ -511,6 +515,7 @@ NPC* NPCCollision()
         }
 
         ballCount = 0;
+        currentCount = 0;
         checkDestruction(newNPC, newNPC->color);
     		colNPC->coltype = 0;
 
@@ -1081,7 +1086,7 @@ void gridDown()
         }
 
     }
-    printGrid();
+    /*printGrid();*/
     DestroyIsland();
 }
 
@@ -1202,15 +1207,17 @@ void checkDestruction(NPC* npc, int checkcolor)
 {
     int n;
     int j;
-    static int currentCount = 0;
+
+    printf("Entrou no check!\n");
+
     currentCount++;
-    /* printf("currentCount = %d\n", currentCount); */
+    printf("currentCount = %d\n", currentCount);
 
     if (ballCount == 0)
     {
         destructionStart = npc;
     }
-    else if (currentCount > 3)
+    else if (currentCount >= 3)
     {
         currentCount = 0;
         return;
@@ -1226,11 +1233,12 @@ void checkDestruction(NPC* npc, int checkcolor)
             }
 
         }
-        printGrid();
+        /*printGrid();*/
         DestroyIsland();
         destructionStart = NULL;
         currentCount = 0;
         health++;
+        printf("Destruiu!\n");
         return;
     }
     /*
@@ -1303,5 +1311,5 @@ void DestroyIsland(){
                 /*SDL_FreeSurface(ballgrid[i][j].image);*/
             }
         }
-    printGrid();
+    /*printGrid();*/
 }
