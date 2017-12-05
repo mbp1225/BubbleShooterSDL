@@ -31,11 +31,12 @@
 /*Screen dimension constants*/
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+
 /*Border Width*/
 const int BORDER = 24;
 
 /*Ball moving speed*/
-const int MSPEED = 14;
+const int MSPEED = 8;
 
 /*Ball collision radius*/
 const int COLRADIUS = 8;
@@ -43,17 +44,19 @@ const int COLRADIUS = 8;
 /*Amount of different colors for the balls*/
 const int COLORS = 6;
 
-/*Quantidade de bolhas total*/
+/*Ballgrid size*/
 const int BALLX = 20;
 const int BALLY = 20;
 
-/*Quantidade de bolhas na grid inicial*/
+/*Initial ballgrid*/
 const int GRIDX = 19;
 const int GRIDY = 5;
 
+/*(true/false)*/
 const int false = 0;
 const int true = 1;
 
+/*Image size constants*/
 const int IMAGE_WIDTH = 32;
 const int IMAGE_HEIGHT = 32;
 
@@ -95,19 +98,34 @@ typedef struct _NPC
     int remain;
 } NPC;
 
+typedef struct _UIELEMENT
+{
+  float posX;
+  float posY;
+  int color;
+  SDL_Surface* image;
+} UIELEMENT;
+
 /*
  * Global Variables
  */
 
 int clicked = 0;
 int quit = 0;
-int health;
+int health = 0;
+int maxhealth = 0;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
 
 /*The image character*/
 PLAYER ball;
+
+/*The next ball color*/
+UIELEMENT nextball;
+
+/*Life elements*/
+UIELEMENT lifeballs[6];
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -150,6 +168,9 @@ PLAYER createPLAYER( float posX, float posY, float stepX, float stepY, int color
 
 /*Create NPC*/
 NPC createNPC(float posY, float posX, int indexY, int indexX, int color, SDL_Surface *image);
+
+/*Create UI element*/
+UIELEMENT createELEMENT(float posX, float posY, int color, SDL_Surface *image);
 
 /*Prepares grid*/
 void prepareGrid();
@@ -208,15 +229,17 @@ void drawPLAYER(PLAYER p);
 /*Displays NPC on screen*/
 void drawNPC(NPC n);
 
-/*Displays Player UI*/
+/*Displays Background*/
 void drawBACKGROUND(BACKGROUND b);
+
+/*Displayes UI element on screen*/
+void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 
 /*Game Function*/
 void game();
 
 /*Shoot Ball Player*/
 void shoot();
-
 
 
 int main( int argc, char* args[] )
@@ -311,9 +334,12 @@ NPC* CeilingCollision()
       ballCount = 0;
       checkDestruction(&ballgrid[1][newX], ballgrid[1][newX].color);
       drawNPC(ballgrid[1][newX]);
+
+      ball.color = nextball.color;
+      ball.image = nextball.image;
       ballcolor = rand() % COLORS + 1;
-      ball.color = ballcolor;
-      ball.image = GetColor(ballcolor);
+      nextball.color = ballcolor;
+      nextball.image = GetColor(ballcolor);
 
       return &ballgrid[0][newX];
   }
@@ -483,14 +509,29 @@ NPC* NPCCollision()
 
         ballCount = 0;
         checkDestruction(newNPC, newNPC->color);
-		colNPC->coltype = 0;
-		ballcolor = rand() % COLORS + 1;
-		ball.color = ballcolor;
-		ball.image = GetColor(ballcolor);
+    		colNPC->coltype = 0;
+
+        ball.color = nextball.color;
+        ball.image = nextball.image;
+        ballcolor = rand() % COLORS + 1;
+        nextball.color = ballcolor;
+        nextball.image = GetColor(ballcolor);
 
         return newNPC;
     }
     return NULL;
+}
+
+/*Create UI element*/
+UIELEMENT createELEMENT(float posX, float posY, int color, SDL_Surface *image)
+{
+  UIELEMENT u;
+
+  u.posX = posX;
+  u.posY = posY;
+  u.color = color;
+  u.image = image;
+  return u;
 }
 
 /*Create PLAYER*/
@@ -527,7 +568,7 @@ NPC createNPC(float posY, float posX,
 	n.centerX = posX + IMAGE_WIDTH/2;
 	n.centerY = posY + IMAGE_HEIGHT/2;
 	n.coltype = 0;
-    n.remain = 0;
+  n.remain = 0;
 
 	return n;
 
@@ -595,7 +636,7 @@ void createGrid(int ballY, int ballX)
 		{
 			ballcolor = rand() % COLORS + 1;
     		BallSurface = GetColor(ballcolor);
-			ballgrid[i][j] = createNPC(
+        ballgrid[i][j] = createNPC(
 				i*(IMAGE_HEIGHT - 5),
 				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
 				i,
@@ -621,6 +662,7 @@ void drawPLAYER(PLAYER p)
 	SDL_BlitSurface( p.image, &srcRect, gScreenSurface, &dstRect );
 }
 
+/*Displayes Background on screen*/
 void drawBACKGROUND(BACKGROUND b)
 {
 	SDL_Rect srcRect, dstRect;
@@ -631,6 +673,19 @@ void drawBACKGROUND(BACKGROUND b)
 	dstRect.x = 0;
 	dstRect.y = 0;
 	SDL_BlitSurface( b.image, &srcRect, gScreenSurface, &dstRect );
+}
+
+/*Displayes UI element on screen*/
+void drawELEMENT(UIELEMENT u, int imageW, int imageH)
+{
+	SDL_Rect srcRect, dstRect;
+	srcRect.x = 0;
+	srcRect.y = 0;
+	srcRect.w = imageW;
+	srcRect.h = imageH;
+	dstRect.x = u.posX;
+	dstRect.y = u.posY;
+	SDL_BlitSurface( u.image, &srcRect, gScreenSurface, &dstRect );
 }
 
 /*Displays NPC on screen*/
@@ -665,11 +720,16 @@ void RefreshScreen()
     for (j = 0; j < BALLX; j++)
         drawNPC(ballgrid[i][j]);
 
+  drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
+
+  for (i=0; i < health; i++)
+    drawELEMENT(lifeballs[i], 8, 8);
+
   /*Update the surface*/
   SDL_UpdateWindowSurface( gWindow );
 
   /* Not so good solution, depends on your computer*/
-  SDL_Delay(1);
+  SDL_Delay(5);
 }
 
 
@@ -753,9 +813,13 @@ void game(){
         /*checkAround(n);*/
 	}
 
-    if (!health){
-	    gridDown();
-        health = 5;
+    if(!maxhealth){
+      maxhealth = 7;
+      if (!health){
+          gridDown();
+          maxhealth --;
+          health = maxhealth;
+      }
     }
 
     RefreshScreen();
@@ -879,6 +943,8 @@ SDL_Surface* loadSurface( char *path )
 int PrepareGame()
 {
   int ballcolor;
+  int i;
+  SDL_Surface* UISurface;
 
   /*Start up SDL and create window*/
   if( !init() )
@@ -913,8 +979,28 @@ int PrepareGame()
                     ballcolor,
                     BallSurface);
 
+  /*Create nextball*/
+  ballcolor = rand() % COLORS + 1;
+  BallSurface = GetColor(ballcolor);
+
+  nextball = createELEMENT(
+              (SCREEN_WIDTH/4 ) - 6,
+              (SCREEN_HEIGHT - IMAGE_HEIGHT),
+              ballcolor,
+              BallSurface);
+
+  UISurface = loadSurface( "./Images/Life.png" );
+  for(i=0; i<6; i++){
+    lifeballs[i] = createELEMENT(
+                    (SCREEN_WIDTH/3) - 24 + (i*18),
+                    (SCREEN_HEIGHT - IMAGE_HEIGHT) +12,
+                    0,
+                    UISurface);
+  }
+
   return 0;
 }
+
 
 void printGrid(){
     int i, j;
