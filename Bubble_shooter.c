@@ -823,7 +823,7 @@ void game(){
         /*checkAround(n);*/
 	}
 
-    if(!maxhealth){
+    if(maxhealth == 1){
       maxhealth = 7;
     }
       if (!health){
@@ -983,6 +983,7 @@ int PrepareGame()
   backg = makeBACKGROUND();
 
   Score = 0;
+  maxhealth = 1;
 
   /*Create Ball Grid*/
   createGrid(GRIDY, GRIDX);
