@@ -214,6 +214,9 @@ void DestroyIsland();
 /*Prepares game initialization and variables*/
 int PrepareGame();
 
+/*Finishes play mode*/
+int PlayEnd();
+
 /*Prints the screen surface and its updates*/
 void RefreshScreen(void);
 
@@ -379,7 +382,7 @@ NPC* checkCollision()
                   */
                   if (ball.centerX > ballgrid[i][j].centerX)
                   {
-                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY +1) ballgrid[i][j].coltype = 1;
+                    if (ball.centerY < IMAGE_HEIGHT/5 + ballgrid[i][j].posY) ballgrid[i][j].coltype = 1;
                     else if (ball.centerY > (IMAGE_HEIGHT/3) * 2 + ballgrid[i][j].posY+1) ballgrid[i][j].coltype = 3;
                     else ballgrid[i][j].coltype = 2;
                   }
@@ -754,21 +757,21 @@ void shoot(){
 		*/
 
 		/*
-		 * CRIANDO UMA EXCEÇÃO PARA ANGULOS ACIMA DE 172 E ABAIXO DE 8 GRAUS
+		 * CRIANDO UMA EXCEÇÃO PARA ANGULOS EXTREMOS (PROXIMOS DE ACIMA DE 172 E ABAIXO DE 8 GRAUS)
 		 * sen 8 = 0.99
 		 * cos 8 = -0.139
 		 */
 
-		if (ball.stepX > 0.99)
+		if (ball.stepX > 0.997)
 		{
-			ball.stepX = 0.99;
-			ball.stepY = -0.139;
+			ball.stepX = 0.997;
+			ball.stepY = -0.0774;
 		}
 
-		if (ball.stepX < -0.99)
+		if (ball.stepX < -0.997)
 		{
-			ball.stepX = -0.99;
-			ball.stepY = -0.139;
+			ball.stepX = -0.997;
+			ball.stepY = -0.0774;
 		}
 
 		ball.stepY*= MSPEED;
@@ -815,11 +818,16 @@ void game(){
 
     if(!maxhealth){
       maxhealth = 7;
+    }
       if (!health){
           gridDown();
           maxhealth --;
           health = maxhealth;
-      }
+    }
+
+    if (PlayEnd()==1){
+      printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
+      quit = true;
     }
 
     RefreshScreen();
@@ -1001,6 +1009,18 @@ int PrepareGame()
   return 0;
 }
 
+
+int PlayEnd(){
+  int i, j;
+  for(i=0; i<BALLY; i++){
+    for(j=0; j<BALLX; j++){
+      if(ballgrid[i][j].indexY==16){
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
 
 void printGrid(){
     int i, j;
