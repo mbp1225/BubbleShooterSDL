@@ -134,10 +134,7 @@ UIELEMENT lifeballs[6];
 UIELEMENT SoundElement;
 
 /*End Game element*/
-UIELEMENT EGelement;
-
-/*Main Menu Arrou*/
-UIELEMENT ArrowElement;
+UIELEMENT EndGameElement;
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -242,9 +239,6 @@ void gridDown();
 /*Creates grid*/
 void createGrid();
 
-/*Gets Background surface*/
-void makeBACKGROUND();
-
 /*Cleans grid*/
 void cleanGrid();
 
@@ -334,6 +328,7 @@ NPC* collision()
         health--;
         printGrid();
         printf("Score = %u\n", Score);
+        printf("oi\n");
     }
 
     return n;
@@ -443,7 +438,7 @@ NPC* checkCollision()
 
 NPC* NPCCollision()
 {
-  int m, n; /* m = index added to NPC i ; n = index added to NPC j */
+    int m, n; /* m = index added to NPC i ; n = index added to NPC j */
 	int ballcolor;
 	NPC *colNPC, *newNPC;
 
@@ -617,10 +612,11 @@ NPC createNPC(float posY, float posX,
 }
 
 /*makes BACKGROUND*/
-void makeBACKGROUND()
+BACKGROUND  makeBACKGROUND()
 {
-  if (interface == 1) backg.image = loadSurface( "./Images/menuBG.png" );
-  if (interface == 2) backg.image = loadSurface( "./Images/BG.png");
+  BACKGROUND b;
+  b.image = loadSurface( "./Images/BG.png" );
+  return b;
 }
 
 /*
@@ -759,19 +755,16 @@ void drawNPC(NPC n)
 void RefreshScreen()
 {
     int i, j;
-    drawBACKGROUND(backg);
 
     /*Main Menu Refresh Screen*/
     if (interface == 1){
-        drawELEMENT(SoundElement, 38, 38);
-        drawELEMENT(ArrowElement, 38, 38);
+        drawBACKGROUND(backg);
     }
 
     /*Play Refresh Screen*/
     if(interface == 2){
+        drawBACKGROUND(backg);
         drawPLAYER(ball);
-        drawELEMENT(SoundElement, 38, 38);
-        drawELEMENT(EGelement, 38, 38);
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -782,6 +775,7 @@ void RefreshScreen()
             drawELEMENT(lifeballs[i], 8, 8);
     }
 
+    drawELEMENT(SoundElement, 38, 38);
 
     /*Update the surface*/
     SDL_UpdateWindowSurface( gWindow );
@@ -871,6 +865,10 @@ void MainMenu(){
                 if(e.key.keysym.sym == SDLK_ESCAPE)
                     quit = true;
             break;
+            case SDL_MOUSEBUTTONDOWN:
+                if(e.button.button == SDL_BUTTON_LEFT)
+                    interface = 2;
+            break;
         }
     }
 }
@@ -881,110 +879,43 @@ void Buttons(){
 
     SDL_GetMouseState( &Mx, &My );
 
-    if(interface == 1){
-        /*Sound Element Button*/
-        SoundElement.posX = 3;
-        if(Mx < (41) && Mx > (3)
+    if(interface == 1 || interface == 2){
+        /*SoundButton*/
+
+        if(Mx < (66) && Mx > (28)
         && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
             if( SDL_PollEvent(&e) != 0){
                 if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                if(Sound) Sound = false;
-                else Sound = true;
+                    if(Sound) Sound = false;
+                    else Sound = true;
                 }
             }
             if (Sound == true){
-            SoundElement.image = loadSurface("./Images/soundOnHover.png");
+                SoundElement.image = loadSurface("./Images/soundOnHover.png");
             }
             else if (Sound == false){
-            SoundElement.image = loadSurface("./Images/soundOffHover.png");
+                SoundElement.image = loadSurface("./Images/soundOffHover.png");
             }
         }
         else{
             if (Sound == true){
-            SoundElement.image = loadSurface("./Images/soundOn.png");
+                SoundElement.image = loadSurface("./Images/soundOn.png");
             }
             else if (Sound == false){
-            SoundElement.image = loadSurface("./Images/soundOff.png");
+                SoundElement.image = loadSurface("./Images/soundOff.png");
             }
         }
-
-        /*Main Menu Buttons*/
-        if(!(Mx > 110 && Mx < 210 && My > 210 && My < 317)){
-            ArrowElement.image = NULL;
-        }
-        else if(Mx > 110 && Mx < 210){
-            ArrowElement.image = loadSurface("./Images/arrow.png");
-            if(My > 210 && My < 235){
-                ArrowElement.posY = 203;
-                if(SDL_PollEvent(&e)!= 0 && e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                    interface = 2;
-                    makeBACKGROUND();
-                }
-            }
-            if(My > 250 && My < 275){
-                ArrowElement.posY = 245;
-            }
-            if(My > 290 && My < 317){
-                ArrowElement.posY = 287;
-                if(SDL_PollEvent(&e)!= 0 && e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                    quit = true;
-                }
-            }
-        }
-
-
     }
 
     if(interface == 2){
         /*End Game Button*/
-        if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
-        && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-            if( SDL_PollEvent(&e) != 0 && (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)){
-              interface = 1;
-              play = 0;
-              cleanGrid();
-              makeBACKGROUND();
-              EGelement.image = loadSurface("./Images/end.png");
-              /*interface = 3*/
-            }
-          EGelement.image = loadSurface("./Images/endHover.png");
-        }
-        else{
-          EGelement.image = loadSurface("./Images/end.png");
-        }
 
-        /*Sound Element Button*/
-        SoundElement.posX = 28;
-          if(Mx < (66) && Mx > (28)
-          && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-              if( SDL_PollEvent(&e) != 0){
-                  if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                      if(Sound) Sound = false;
-                      else Sound = true;
-                  }
-          }
-          if (Sound == true){
-              SoundElement.image = loadSurface("./Images/soundOnHover.png");
-          }
-          else if (Sound == false){
-              SoundElement.image = loadSurface("./Images/soundOffHover.png");
-          }
-        }
-        else{
-          if (Sound == true){
-              SoundElement.image = loadSurface("./Images/soundOn.png");
-          }
-          else if (Sound == false){
-              SoundElement.image = loadSurface("./Images/soundOff.png");
-          }
-      }
     }
+
 }
 
 void Play(){
     SDL_Event e;
-    interface = 2;
-    SoundElement.posX = 28;
 
     while( SDL_PollEvent( &e ) != 0 )
     {
@@ -1169,12 +1100,11 @@ int PrepareGame()
       return 2;
   }
 
+  /*Create Background*/
+  backg = makeBACKGROUND();
 
   interface = 1;
   Sound = true;
-
-  /*Create Background*/
-  makeBACKGROUND();
 
   /*Create PLAYER*/
 
@@ -1212,26 +1142,19 @@ int PrepareGame()
                 UISurface);
 
   UISurface = loadSurface("./Images/end.png");
-  EGelement = createELEMENT(
-                  SCREEN_WIDTH - 2*IMAGE_WIDTH -2,
-                  (SCREEN_HEIGHT - 41),
-                  0,
-                  UISurface);
-
-  UISurface = NULL;
-  ArrowElement = createELEMENT(
-                    72,
-                    0,
-                    0,
-                    UISurface);
+  EndGameElement = createELEMENT(
+                SCREEN_WIDTH - 28,
+                SCREEEN_HEIGHT - 41,
+                0,
+                UISurface);
+  )
 
   return 0;
 }
 
 void PreparePlay(){
       /*Create Ball Grid*/
-      maxhealth = 6;
-      health = maxhealth;
+      maxhealth = 7;
       createGrid(GRIDY);
       Score = 0;
       play = 1;
