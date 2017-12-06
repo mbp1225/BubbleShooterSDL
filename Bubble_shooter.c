@@ -111,9 +111,11 @@ typedef struct _UIELEMENT
  */
 
 int clicked = 0;
+int play = 0;
 int quit = 0;
 int health = 0;
 int maxhealth = 0;
+int Sound;
 unsigned int Score;
 
 /*The window we'll be rendering to*/
@@ -127,6 +129,9 @@ UIELEMENT nextball;
 
 /*Life elements*/
 UIELEMENT lifeballs[6];
+
+/*Sound on/off element*/
+UIELEMENT SoundElement;
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -180,9 +185,6 @@ UIELEMENT createELEMENT(float posX, float posY, int color, SDL_Surface *image);
 /*Prepares grid*/
 void prepareGrid();
 
-/*Create grid*/
-void createGrid(int ballY, int ballX);
-
 /*Move PLAYER*/
 void movePLAYER();
 
@@ -231,6 +233,12 @@ void printGrid();
 /*Moves the grid down when called*/
 void gridDown();
 
+/*Creates grid*/
+void createGrid();
+
+/*Cleans grid*/
+void cleanGrid();
+
 /*Displays player on screen*/
 void drawPLAYER(PLAYER p);
 
@@ -246,11 +254,17 @@ void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 /*Game Function*/
 void Game();
 
+/*Prepare play Function*/
+void PreparePlay();
+
 /*Play mode Function*/
 void Play();
 
 /*Main Menu Function*/
 void MainMenu();
+
+/*Sound Button Function*/
+void SoundButton();
 
 /*Shoot Ball Player*/
 void shoot();
@@ -636,7 +650,7 @@ SDL_Surface* GetColor(int color)
             ColorSurface = loadSurface( "./Images/Neptune.png" );
             break;
         case 4:
-        ColorSurface = loadSurface( "./Images/Venus.png" );
+            ColorSurface = loadSurface( "./Images/Venus.png" );
             break;
         case 5:
             ColorSurface = loadSurface( "./Images/Jupiter.png" );
@@ -649,30 +663,34 @@ SDL_Surface* GetColor(int color)
     return ColorSurface;
 }
 
+/*Clean Grid*/
+void cleanGrid(){
+    int i, j;
+
+    for (i=1; i<BALLY; i++){
+        for(j=1; j<BALLX; j++){
+            ballgrid[i][j].indexX = 0;
+            ballgrid[i][j].indexY = 0;
+            ballgrid[i][j].posX = 0;
+            ballgrid[i][j].posY = 0;
+            ballgrid[i][j].centerX = 0;
+            ballgrid[i][j].centerY = 0;
+            ballgrid[i][j].color = 0;
+        }
+    }
+}
+
 /*Create Grid*/
-void createGrid(int ballY, int ballX)
+void createGrid(int ballY)
 {
-	int i, j;
-    int ballcolor;
-    SDL_Surface* BallSurface;
+	int i;
 
     /*LEMBRAR DE TROCAR ISTO QUANDO FOR PARA MATRIZ*/
 	for (i = 1; i < ballY; i++)
 	{
-		for (j=1; j < ballX; j++)
-		{
-			ballcolor = rand() % COLORS + 1;
-    		BallSurface = GetColor(ballcolor);
-        ballgrid[i][j] = createNPC(
-				i*(IMAGE_HEIGHT - 5),
-				j*IMAGE_WIDTH + (i%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
-				i,
-				j,
-                ballcolor,
-				BallSurface
-            );
-			drawNPC(ballgrid[i][j]);
-		}
+        gridDown();
+        SDL_Delay(50);
+        RefreshScreen();
 	}
 }
 
@@ -736,8 +754,7 @@ void RefreshScreen()
 
     /*Main Menu Refresh Screen*/
     if (interface == 1){
-        SDL_FillRect( gScreenSurface, NULL,
-        SDL_MapRGBA( BallSurface->format, 0x00, 0x00, 0x00, 0xFF ));
+        drawBACKGROUND(backg);
     }
 
     /*Play Refresh Screen*/
@@ -753,6 +770,8 @@ void RefreshScreen()
         for (i=0; i < health; i++)
             drawELEMENT(lifeballs[i], 8, 8);
     }
+
+    drawELEMENT(SoundElement, 38, 38);
 
     /*Update the surface*/
     SDL_UpdateWindowSurface( gWindow );
@@ -810,11 +829,15 @@ void shoot(){
 }
 
 void Game(){
+    SoundButton();
     switch(interface){
         case 1: /*MainMenu*/
             MainMenu();
             break;
         case 2: /*Play*/
+            if(!play){
+                PreparePlay();
+            }
             Play();
             break;
         case 3: /*Highscores*/
@@ -822,6 +845,7 @@ void Game(){
         case 4: /*Credits*/
             break;
     }
+    RefreshScreen();
 }
 
 void MainMenu(){
@@ -843,6 +867,48 @@ void MainMenu(){
             break;
         }
     }
+}
+
+void SoundButton(){
+    SDL_Event e;
+    int Mx, My;
+
+    SDL_GetMouseState( &Mx, &My );
+
+    if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
+    && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
+        /*while( SDL_PollEvent(&e) != 0){
+            if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                if(Sound) Sound = false;
+                else Sound = true;
+            }
+        }*/
+        if (Sound == true){
+            SoundElement.image = loadSurface("./Images/soundOnHover.png");
+        }
+        else if (Sound == false){
+            SoundElement.image = loadSurface("./Images/soundOffHover.png");
+        }
+    }
+    else{
+        if (Sound == true){
+            SoundElement.image = loadSurface("./Images/soundOn.png");
+        }
+        else if (Sound == false){
+            SoundElement.image = loadSurface("./Images/soundOff.png");
+        }
+    }
+
+    /*while( SDL_PollEvent(&e) != 0)
+    {
+        switch(e.type){
+            case SDL_MOUSEBUTTONDOWN:
+                if(e.button.button == SDL_BUTTON_LEFT){
+                    if(Sound) Sound = false;
+                    else Sound = true;
+                }
+            }
+    }*/
 }
 
 void Play(){
@@ -887,10 +953,9 @@ void Play(){
 
     if (PlayEnd()==1){
       printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
-      quit = true;
+      interface = 1;
     }
 
-    RefreshScreen();
 }
 
 int init() {
@@ -1035,13 +1100,8 @@ int PrepareGame()
   /*Create Background*/
   backg = makeBACKGROUND();
 
-  Score = 0;
-  maxhealth = 1;
-
   interface = 1;
-
-  /*Create Ball Grid*/
-  createGrid(GRIDY, GRIDX);
+  Sound = true;
 
   /*Create PLAYER*/
 
@@ -1071,15 +1131,31 @@ int PrepareGame()
                     UISurface);
   }
 
+  UISurface = loadSurface("./Images/soundOn.png");
+  SoundElement = createELEMENT(
+                SCREEN_WIDTH - 2*IMAGE_WIDTH -2,
+                (SCREEN_HEIGHT - 41),
+                0,
+                UISurface);
+
   return 0;
 }
 
+void PreparePlay(){
+      /*Create Ball Grid*/
+      maxhealth = 7;
+      createGrid(GRIDY);
+      Score = 0;
+      play = 1;
+}
 
 int PlayEnd(){
   int i, j;
   for(i=0; i<BALLY; i++){
     for(j=0; j<BALLX; j++){
       if(ballgrid[i][j].indexY==16){
+        play = 0;
+        cleanGrid();
         return 1;
       }
     }
@@ -1102,7 +1178,7 @@ void printGrid(){
 void gridDown()
 {
     int i, j, ballcolor;
-    SDL_Delay(50);
+    SDL_Delay(25);
 
     for (i = BALLY-1; i > 0; i--)
 	{
