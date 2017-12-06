@@ -782,50 +782,50 @@ void RefreshScreen()
 
 
 void shoot(){
-  int Mx, My;
+    int Mx, My;
 
-  SDL_GetMouseState( &Mx, &My );
-  /*Reinterpretando Mx e My com origem no centro de ball*/
-  Mx = Mx - SCREEN_WIDTH/2;
-  My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
-  /*Click nao funciona se My < centro da bolinha*/
+    SDL_GetMouseState( &Mx, &My );
 
-	if(My > 0)
-	{
-		/*Reinterpretando x e y para que a hipotenusa seja 1 (calculando o step)*/
-		ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
-		ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
+    /*Click nao funciona se My dentro de safe zone*/
+    if(My > SCREEN_HEIGHT- 45 ) return;
 
-		/* CASO NECESSARIO, SABER QUAL STEPX E STEPY
-		printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
-		printf("%d, %d\n", Mx, My);
-		*/
+    /*Reinterpretando Mx e My com origem no centro de ball*/
+    Mx = Mx - SCREEN_WIDTH/2;
+    My = SCREEN_HEIGHT - My - IMAGE_HEIGHT/2;
 
-		/*
-		 * CRIANDO UMA EXCEÇÃO PARA ANGULOS EXTREMOS (PROXIMOS DE ACIMA DE 172 E ABAIXO DE 8 GRAUS)
-		 * sen 8 = 0.99
-		 * cos 8 = -0.139
-		 */
+    /*Reinterpretando x e y para que a hipotenusa seja 1 (calculando o step)*/
+    ball.stepX = Mx / sqrt((Mx*Mx) + (My*My));
+    ball.stepY = -My / sqrt((Mx*Mx) + (My*My));
 
-		if (ball.stepX > 0.997)
-		{
-			ball.stepX = 0.997;
-			ball.stepY = -0.0774;
-		}
+    /* CASO NECESSARIO, SABER QUAL STEPX E STEPY
+    printf("step X = %f\nstep Y = %f\n", ball.stepX, ball.stepY);
+    printf("%d, %d\n", Mx, My);
+    */
 
-		if (ball.stepX < -0.997)
-		{
-			ball.stepX = -0.997;
-			ball.stepY = -0.0774;
-		}
+    /*
+     * CRIANDO UMA EXCEÇÃO PARA ANGULOS EXTREMOS (PROXIMOS DE ACIMA DE 172 E ABAIXO DE 8 GRAUS)
+     * sen 8 = 0.99
+     * cos 8 = -0.139
+     */
 
-		ball.stepY*= MSPEED;
-		ball.stepX*= MSPEED;
-		clicked = 1;
-		/* P/ TESTAR A BOLINHA IR RETO
-		  ball.stepX = 0;
-		  ball.stepY = -8; */
-	}
+    if (ball.stepX > 0.997)
+    {
+    	ball.stepX = 0.997;
+    	ball.stepY = -0.0774;
+    }
+
+    if (ball.stepX < -0.997)
+    {
+    	ball.stepX = -0.997;
+    	ball.stepY = -0.0774;
+    }
+
+    ball.stepY*= MSPEED;
+    ball.stepX*= MSPEED;
+    clicked = 1;
+    /* P/ TESTAR A BOLINHA IR RETO
+      ball.stepX = 0;
+      ball.stepY = -8; */
 }
 
 void Game(){
@@ -877,7 +877,7 @@ void SoundButton(){
 
     if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
     && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-        /*while( SDL_PollEvent(&e) != 0){
+        /*if( SDL_PollEvent(&e) != 0){
             if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                 if(Sound) Sound = false;
                 else Sound = true;
