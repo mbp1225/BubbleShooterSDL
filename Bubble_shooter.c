@@ -877,12 +877,12 @@ void SoundButton(){
 
     if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
     && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-        /*if( SDL_PollEvent(&e) != 0){
+        if( SDL_PollEvent(&e) != 0){
             if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                 if(Sound) Sound = false;
                 else Sound = true;
             }
-        }*/
+        }
         if (Sound == true){
             SoundElement.image = loadSurface("./Images/soundOnHover.png");
         }
