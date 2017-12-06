@@ -134,6 +134,9 @@ NPC ballgrid[20][20];
 int ballCount = 0;
 int currentCount = 0;
 
+/*interfaces*/
+int interface;
+
 /*Ball surface*/
 SDL_Surface* BallSurface;
 
@@ -241,7 +244,13 @@ void drawBACKGROUND(BACKGROUND b);
 void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 
 /*Game Function*/
-void game();
+void Game();
+
+/*Play mode Function*/
+void Play();
+
+/*Main Menu Function*/
+void MainMenu();
 
 /*Shoot Ball Player*/
 void shoot();
@@ -262,7 +271,7 @@ int main( int argc, char* args[] )
     /*While application is running*/
     while( !quit )
     {
-        game();
+        Game();
     }
 
     /*Free resources and closing SDL*/
@@ -603,6 +612,14 @@ BACKGROUND  makeBACKGROUND()
     6 = mars
 */
 
+/*
+    INTERFACE CODES
+    1 = main menu
+    2 = play
+    3 = highscores
+    4 = credits
+*/
+
 SDL_Surface* GetColor(int color)
 {
     SDL_Surface* ColorSurface;
@@ -715,31 +732,33 @@ void drawNPC(NPC n)
 
 void RefreshScreen()
 {
-  int i, j;
+    int i, j;
 
-  /*Fill the surface white*/
+    /*Main Menu Refresh Screen*/
+    if (interface == 1){
+        SDL_FillRect( gScreenSurface, NULL,
+        SDL_MapRGBA( BallSurface->format, 0x00, 0x00, 0x00, 0xFF ));
+    }
 
-  SDL_FillRect( gScreenSurface, NULL,
-  SDL_MapRGBA( BallSurface->format, 0x00, 0x00, 0x00, 0xFF ));
+    /*Play Refresh Screen*/
+    if(interface == 2){
+        drawBACKGROUND(backg);
+        drawPLAYER(ball);
 
-  drawBACKGROUND(backg);
+        for (i = 0; i < BALLY; i++)
+            for (j = 0; j < BALLX; j++)
+                drawNPC(ballgrid[i][j]);
+        drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-  drawPLAYER(ball);
+        for (i=0; i < health; i++)
+            drawELEMENT(lifeballs[i], 8, 8);
+    }
 
-  for (i = 0; i < BALLY; i++)
-    for (j = 0; j < BALLX; j++)
-        drawNPC(ballgrid[i][j]);
+    /*Update the surface*/
+    SDL_UpdateWindowSurface( gWindow );
 
-  drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
-
-  for (i=0; i < health; i++)
-    drawELEMENT(lifeballs[i], 8, 8);
-
-  /*Update the surface*/
-  SDL_UpdateWindowSurface( gWindow );
-
-  /* Not so good solution, depends on your computer*/
-  SDL_Delay(5);
+    /* Not so good solution, depends on your computer*/
+    SDL_Delay(5);
 }
 
 
@@ -790,9 +809,43 @@ void shoot(){
 	}
 }
 
-void game(){
-    /*NPC *n;*/
-    /*Por enquanto, este é o play(){*/
+void Game(){
+    switch(interface){
+        case 1: /*MainMenu*/
+            MainMenu();
+            break;
+        case 2: /*Play*/
+            Play();
+            break;
+        case 3: /*Highscores*/
+            break;
+        case 4: /*Credits*/
+            break;
+    }
+}
+
+void MainMenu(){
+    SDL_Event e;
+
+    while( SDL_PollEvent(&e) != 0)
+    {
+        switch(e.type){
+            case SDL_QUIT:
+                quit = true;
+            break;
+            case SDL_KEYDOWN:
+                if(e.key.keysym.sym == SDLK_ESCAPE)
+                    quit = true;
+            break;
+            case SDL_MOUSEBUTTONDOWN:
+                if(e.button.button == SDL_BUTTON_LEFT)
+                    interface = 2;
+            break;
+        }
+    }
+}
+
+void Play(){
     SDL_Event e;
 
     while( SDL_PollEvent( &e ) != 0 )
@@ -984,6 +1037,8 @@ int PrepareGame()
 
   Score = 0;
   maxhealth = 1;
+
+  interface = 1;
 
   /*Create Ball Grid*/
   createGrid(GRIDY, GRIDX);
