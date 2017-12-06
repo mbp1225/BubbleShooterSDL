@@ -133,6 +133,9 @@ UIELEMENT lifeballs[6];
 /*Sound on/off element*/
 UIELEMENT SoundElement;
 
+/*End Game element*/
+UIELEMENT EndGameElement;
+
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
 
@@ -236,6 +239,9 @@ void gridDown();
 /*Creates grid*/
 void createGrid();
 
+/*Gets Background surface*/
+void makeBACKGROUND();
+
 /*Cleans grid*/
 void cleanGrid();
 
@@ -264,7 +270,7 @@ void Play();
 void MainMenu();
 
 /*Sound Button Function*/
-void SoundButton();
+void Buttons();
 
 /*Shoot Ball Player*/
 void shoot();
@@ -434,7 +440,7 @@ NPC* checkCollision()
 
 NPC* NPCCollision()
 {
-    int m, n; /* m = index added to NPC i ; n = index added to NPC j */
+  int m, n; /* m = index added to NPC i ; n = index added to NPC j */
 	int ballcolor;
 	NPC *colNPC, *newNPC;
 
@@ -608,11 +614,10 @@ NPC createNPC(float posY, float posX,
 }
 
 /*makes BACKGROUND*/
-BACKGROUND  makeBACKGROUND()
+void makeBACKGROUND()
 {
-  BACKGROUND b;
-  b.image = loadSurface( "./Images/BG.png" );
-  return b;
+  if (interface == 1) backg.image = loadSurface( "./Images/menuBG.png" );
+  if (interface == 2) backg.image = loadSurface( "./Images/BG.png");
 }
 
 /*
@@ -751,16 +756,18 @@ void drawNPC(NPC n)
 void RefreshScreen()
 {
     int i, j;
+    drawBACKGROUND(backg);
 
     /*Main Menu Refresh Screen*/
     if (interface == 1){
-        drawBACKGROUND(backg);
+        drawELEMENT(SoundElement, 38, 38);
     }
 
     /*Play Refresh Screen*/
     if(interface == 2){
-        drawBACKGROUND(backg);
         drawPLAYER(ball);
+        drawELEMENT(SoundElement, 38, 38);
+        drawELEMENT(EndGameElement, 38, 38);
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -771,7 +778,6 @@ void RefreshScreen()
             drawELEMENT(lifeballs[i], 8, 8);
     }
 
-    drawELEMENT(SoundElement, 38, 38);
 
     /*Update the surface*/
     SDL_UpdateWindowSurface( gWindow );
@@ -829,7 +835,7 @@ void shoot(){
 }
 
 void Game(){
-    SoundButton();
+    Buttons();
     switch(interface){
         case 1: /*MainMenu*/
             MainMenu();
@@ -862,53 +868,66 @@ void MainMenu(){
                     quit = true;
             break;
             case SDL_MOUSEBUTTONDOWN:
-                if(e.button.button == SDL_BUTTON_LEFT)
+                if(e.button.button == SDL_BUTTON_LEFT){
                     interface = 2;
+                    makeBACKGROUND();
+                }
             break;
         }
     }
 }
 
-void SoundButton(){
+void Buttons(){
     SDL_Event e;
     int Mx, My;
 
     SDL_GetMouseState( &Mx, &My );
 
-    if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
-    && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-        if( SDL_PollEvent(&e) != 0){
-            if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                if(Sound) Sound = false;
-                else Sound = true;
-            }
-        }
-        if (Sound == true){
-            SoundElement.image = loadSurface("./Images/soundOnHover.png");
-        }
-        else if (Sound == false){
-            SoundElement.image = loadSurface("./Images/soundOffHover.png");
-        }
-    }
-    else{
-        if (Sound == true){
-            SoundElement.image = loadSurface("./Images/soundOn.png");
-        }
-        else if (Sound == false){
-            SoundElement.image = loadSurface("./Images/soundOff.png");
-        }
+    if(interface == 1 || interface == 2){
+      /*Sound Button*/
+      if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
+      && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
+          if( SDL_PollEvent(&e) != 0){
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                  if(Sound) Sound = false;
+                  else Sound = true;
+              }
+          }
+          if (Sound == true){
+              SoundElement.image = loadSurface("./Images/soundOnHover.png");
+          }
+          else if (Sound == false){
+              SoundElement.image = loadSurface("./Images/soundOffHover.png");
+          }
+      }
+      else{
+          if (Sound == true){
+              SoundElement.image = loadSurface("./Images/soundOn.png");
+          }
+          else if (Sound == false){
+              SoundElement.image = loadSurface("./Images/soundOff.png");
+          }
+      }
     }
 
-    /*while( SDL_PollEvent(&e) != 0)
-    {
-        switch(e.type){
-            case SDL_MOUSEBUTTONDOWN:
-                if(e.button.button == SDL_BUTTON_LEFT){
-                    if(Sound) Sound = false;
-                    else Sound = true;
-                }
+    if(interface == 2){
+        /*End Game Button*/
+        if(Mx < (66) && Mx > (28)
+        && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
+            if( SDL_PollEvent(&e) != 0 && (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)){
+              interface = 1;
+              play = 0;
+              cleanGrid();
+              makeBACKGROUND();
+              EndGameElement.image = loadSurface("./Images/end.png");
+              /*interface = 3*/
             }
-    }*/
+          EndGameElement.image = loadSurface("./Images/endHover.png");
+        }
+        else{
+          EndGameElement.image = loadSurface("./Images/end.png");
+        }
+    }
 }
 
 void Play(){
@@ -1097,11 +1116,12 @@ int PrepareGame()
       return 2;
   }
 
-  /*Create Background*/
-  backg = makeBACKGROUND();
 
   interface = 1;
   Sound = true;
+
+  /*Create Background*/
+  makeBACKGROUND();
 
   /*Create PLAYER*/
 
@@ -1133,17 +1153,25 @@ int PrepareGame()
 
   UISurface = loadSurface("./Images/soundOn.png");
   SoundElement = createELEMENT(
-                SCREEN_WIDTH - 2*IMAGE_WIDTH -2,
+                28,
                 (SCREEN_HEIGHT - 41),
                 0,
                 UISurface);
+
+  UISurface = loadSurface("./Images/end.png");
+  EndGameElement = createELEMENT(
+                  SCREEN_WIDTH - 2*IMAGE_WIDTH -2,
+                  (SCREEN_HEIGHT - 41),
+                  0,
+                  UISurface);
 
   return 0;
 }
 
 void PreparePlay(){
       /*Create Ball Grid*/
-      maxhealth = 7;
+      maxhealth = 6;
+      health = maxhealth;
       createGrid(GRIDY);
       Score = 0;
       play = 1;
