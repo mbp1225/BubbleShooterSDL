@@ -273,7 +273,7 @@ void Play();
 void MainMenu();
 
 /*Sound Button Function*/
-void Buttons();
+void Buttons(SDL_Event e);
 
 /*Shoot Ball Player*/
 void shoot();
@@ -839,7 +839,6 @@ void shoot(){
 }
 
 void Game(){
-    Buttons();
     switch(interface){
         case 1: /*MainMenu*/
             MainMenu();
@@ -863,6 +862,7 @@ void MainMenu(){
 
     while( SDL_PollEvent(&e) != 0)
     {
+        Buttons(e);
         switch(e.type){
             case SDL_QUIT:
                 quit = true;
@@ -875,12 +875,10 @@ void MainMenu(){
     }
 }
 
-void Buttons(){
-    SDL_Event e;
+void Buttons(SDL_Event e){
     int Mx, My;
 
     SDL_GetMouseState( &Mx, &My );
-
     if(interface == 1){
         /*Sound Element Button*/
         SoundElement.posX = 3;
@@ -916,7 +914,8 @@ void Buttons(){
             ArrowElement.image = loadSurface("./Images/arrow.png");
             if(My > 210 && My < 235){
                 ArrowElement.posY = 203;
-                if(SDL_PollEvent(&e)!= 0 && e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                while(SDL_PollEvent(&e)!= 0)
+                    if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                     interface = 2;
                     makeBACKGROUND();
                 }
@@ -942,6 +941,7 @@ void Buttons(){
             if( SDL_PollEvent(&e) != 0 && (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)){
               interface = 1;
               play = 0;
+              ArrowElement.image = NULL;
               cleanGrid();
               makeBACKGROUND();
               EGelement.image = loadSurface("./Images/end.png");
@@ -988,6 +988,7 @@ void Play(){
 
     while( SDL_PollEvent( &e ) != 0 )
     {
+        Buttons(e);
         if( e.type == SDL_QUIT )
         {
             quit = true;
@@ -1026,6 +1027,7 @@ void Play(){
     if (PlayEnd()==1){
       printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
       interface = 1;
+      makeBACKGROUND();
     }
 
 }
