@@ -19,11 +19,14 @@
 /*Using SDL, SDL_image, standard IO, and strings*/
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
 
+#define WAV_PATH "./Sounds/Kick-Drum-1.wav"
+#define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
 /*
  * Constants
  */
@@ -120,6 +123,12 @@ unsigned int Score;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
+
+/* Our wave file */
+Mix_Chunk *wave = NULL;
+
+/* Our music file */
+Mix_Music *music = NULL;
 
 /*The image character*/
 PLAYER ball;
@@ -290,6 +299,8 @@ int main( int argc, char* args[] )
     {
       return errortest;
     }
+
+    Mix_PlayMusic( music, -1);
 
     /*While application is running*/
     while( !quit )
@@ -839,6 +850,10 @@ void shoot(){
 }
 
 void Game(){
+
+    if(!Sound) Mix_PauseMusic();
+    else Mix_ResumeMusic();
+
     switch(interface){
         case 1: /*MainMenu*/
             MainMenu();
@@ -1065,6 +1080,21 @@ int init() {
                 /*Get window surface*/
                 gScreenSurface = SDL_GetWindowSurface( gWindow );
             }
+
+            /*Initialize SDL_mixer */
+            if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
+            	return -1;
+
+            /* Load our sound effect */
+            wave = Mix_LoadWAV(WAV_PATH);
+            if (wave == NULL)
+            	return -1;
+
+            /* Load our music */
+            music = Mix_LoadMUS(MUS_PATH);
+            if (music == NULL)
+            	return -1;
+
         }
     }
 
@@ -1102,6 +1132,13 @@ void closing()
     /*Destroy window*/
     SDL_DestroyWindow( gWindow );
     gWindow = NULL;
+
+    /* clean up our resources */
+	Mix_FreeChunk(wave);
+	Mix_FreeMusic(music);
+
+	/* quit SDL_mixer */
+	Mix_CloseAudio();
 
     /*Quit SDL subsystems*/
     IMG_Quit();
@@ -1218,7 +1255,7 @@ int PrepareGame()
   UISurface = NULL;
   ArrowElement = createELEMENT(
                     72,
-                    0,
+                    -38,
                     0,
                     UISurface);
 
