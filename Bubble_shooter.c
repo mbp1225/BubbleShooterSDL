@@ -884,11 +884,9 @@ void Buttons(SDL_Event e){
         SoundElement.posX = 3;
         if(Mx < (41) && Mx > (3)
         && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-            if( SDL_PollEvent(&e) != 0){
-                if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                if(Sound) Sound = false;
-                else Sound = true;
-                }
+            if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+            if(Sound) Sound = false;
+            else Sound = true;
             }
             if (Sound == true){
             SoundElement.image = loadSurface("./Images/soundOnHover.png");
@@ -914,10 +912,9 @@ void Buttons(SDL_Event e){
             ArrowElement.image = loadSurface("./Images/arrow.png");
             if(My > 210 && My < 235){
                 ArrowElement.posY = 203;
-                while(SDL_PollEvent(&e)!= 0)
-                    if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                    interface = 2;
-                    makeBACKGROUND();
+                if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                interface = 2;
+                makeBACKGROUND();
                 }
             }
             if(My > 250 && My < 275){
@@ -925,7 +922,7 @@ void Buttons(SDL_Event e){
             }
             if(My > 290 && My < 317){
                 ArrowElement.posY = 287;
-                if(SDL_PollEvent(&e)!= 0 && e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                     quit = true;
                 }
             }
@@ -938,7 +935,7 @@ void Buttons(SDL_Event e){
         /*End Game Button*/
         if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
         && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-            if( SDL_PollEvent(&e) != 0 && (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)){
+            if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
               interface = 1;
               play = 0;
               ArrowElement.image = NULL;
@@ -957,12 +954,10 @@ void Buttons(SDL_Event e){
         SoundElement.posX = 28;
           if(Mx < (66) && Mx > (28)
           && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
-              if( SDL_PollEvent(&e) != 0){
-                  if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
-                      if(Sound) Sound = false;
-                      else Sound = true;
-                  }
-          }
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                  if(Sound) Sound = false;
+                  else Sound = true;
+              }
           if (Sound == true){
               SoundElement.image = loadSurface("./Images/soundOnHover.png");
           }
