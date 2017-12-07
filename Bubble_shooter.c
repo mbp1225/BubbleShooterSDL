@@ -20,13 +20,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define WAV_PATH "./Sounds/Kick-Drum-1.wav"
 #define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
+#define TTF_PATH "./TTF/fonteScore.ttf"
+
 /*
  * Constants
  */
@@ -119,7 +123,7 @@ int quit = 0;
 int health = 0;
 int maxhealth = 0;
 int Sound;
-unsigned int Score;
+int Score;
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
@@ -147,6 +151,21 @@ UIELEMENT EGelement;
 
 /*Main Menu Arrou*/
 UIELEMENT ArrowElement;
+
+/*Score TTF*/
+UIELEMENT ScoreElement;
+
+/*The TTF_Font*/
+TTF_Font* font;
+
+/*The TTF Color*/
+SDL_Color ttfColor;
+
+/*The Message Surface*/
+SDL_Surface* surfaceMessage;
+
+/*The Message Rect*/
+SDL_Rect Message_rect;
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -327,6 +346,7 @@ void movePLAYER()
 
 NPC* collision()
 {
+    char scoreString[30];
     NPC *n;
 
     /*Checks if there's any NPC collision for it inside the function*/
@@ -344,7 +364,13 @@ NPC* collision()
         clicked = 0;
         health--;
         printGrid();
-        printf("Score = %u\n", Score);
+        printf("Score = %d\n", Score);
+
+        /*itoa(Score, scoreString, 10);*/
+        sprintf(scoreString, "%d", Score);
+        printf("String Score = %s\n", scoreString);
+        surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
+        ScoreElement.image = surfaceMessage;
     }
 
     return n;
@@ -783,6 +809,7 @@ void RefreshScreen()
         drawPLAYER(ball);
         drawELEMENT(SoundElement, 38, 38);
         drawELEMENT(EGelement, 38, 38);
+        drawELEMENT(ScoreElement, 100,100);
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -851,8 +878,8 @@ void shoot(){
 
 void Game(){
 
-    if(!Sound) Mix_PauseMusic();
-    else Mix_ResumeMusic();
+    if(!Sound) Mix_VolumeMusic(0);
+    else Mix_VolumeMusic(100);
 
     switch(interface){
         case 1: /*MainMenu*/
@@ -1081,6 +1108,12 @@ int init() {
                 gScreenSurface = SDL_GetWindowSurface( gWindow );
             }
 
+            /*Initialize TTF*/
+            if (TTF_Init() == -1){
+        		printf("SDL could not initialize TTF! SDL Error: %s\n", SDL_GetError());
+                success = false;
+	        }
+
             /*Initialize SDL_mixer */
             if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
             	return -1;
@@ -1094,6 +1127,15 @@ int init() {
             music = Mix_LoadMUS(MUS_PATH);
             if (music == NULL)
             	return -1;
+
+            /* Load TTF font */
+            font = TTF_OpenFont(TTF_PATH, 24);
+            if(font == NULL)
+                return -1;
+
+            ttfColor.r = 245;
+            ttfColor.g = 245;
+            ttfColor.b = 245;
 
         }
     }
@@ -1258,6 +1300,13 @@ int PrepareGame()
                     -38,
                     0,
                     UISurface);
+
+  UISurface = surfaceMessage;
+  ScoreElement = createELEMENT(
+                SCREEN_WIDTH/2,
+                SCREEN_HEIGHT/2,
+                0,
+                UISurface);
 
   return 0;
 }
