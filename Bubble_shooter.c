@@ -992,6 +992,8 @@ void Buttons(SDL_Event e){
               nextball.image = GetColor(ballcolor);
               nextball.color = ballcolor;
               ArrowElement.image = NULL;
+              surfaceMessage = TTF_RenderText_Solid(font, "00000000000", ttfColor);
+              ScoreElement.image = surfaceMessage;
               cleanGrid();
               makeBACKGROUND();
               EGelement.image = loadSurface("./Images/end.png");
@@ -1148,6 +1150,8 @@ int init() {
             ttfColor.g = 243;
             ttfColor.b = 245;
 
+            surfaceMessage = TTF_RenderText_Solid(font, "00000000000", ttfColor);
+
         }
     }
 
@@ -1259,7 +1263,7 @@ int PrepareGame()
 
   interface = 1;
   /*####*/
-  Sound = false;
+  Sound = true;
 
   /*Create Background*/
   makeBACKGROUND();
