@@ -27,9 +27,11 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define DELAY 5
+
 #define WAV_PATH "./Sounds/Kick-Drum-1.wav"
 #define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
-#define TTF_PATH "./TTF/pirulen.ttf"
+#define TTF_PATH "./TTF/Graph-35-pix.ttf"
 
 /*
  * Constants
@@ -367,12 +369,11 @@ NPC* collision()
         printf("Score = %d\n", Score);
 
         /*itoa(Score, scoreString, 10);*/
-        sprintf(scoreString, "%0 12d", Score);
+        sprintf(scoreString, "%012d", Score);
         printf("String Score = %s\n", scoreString);
         surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
         ScoreElement.image = surfaceMessage;
     }
-
     return n;
 }
 
@@ -734,7 +735,7 @@ void createGrid(int ballY)
 	for (i = 1; i < ballY; i++)
 	{
         gridDown();
-        SDL_Delay(50);
+        SDL_Delay(10*DELAY);
         RefreshScreen();
 	}
 }
@@ -825,7 +826,7 @@ void RefreshScreen()
     SDL_UpdateWindowSurface( gWindow );
 
     /* Not so good solution, depends on your computer*/
-    SDL_Delay(5);
+    SDL_Delay(DELAY);
 }
 
 
@@ -992,7 +993,7 @@ void Buttons(SDL_Event e){
               nextball.image = GetColor(ballcolor);
               nextball.color = ballcolor;
               ArrowElement.image = NULL;
-              surfaceMessage = TTF_RenderText_Solid(font, "00000000000", ttfColor);
+              surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);
               ScoreElement.image = surfaceMessage;
               cleanGrid();
               makeBACKGROUND();
@@ -1142,7 +1143,7 @@ int init() {
             	return -1;
 
             /* Load TTF font */
-            font = TTF_OpenFont(TTF_PATH, 13);
+            font = TTF_OpenFont(TTF_PATH, 10);
             if(font == NULL)
                 return -1;
 
@@ -1150,7 +1151,7 @@ int init() {
             ttfColor.g = 243;
             ttfColor.b = 245;
 
-            surfaceMessage = TTF_RenderText_Solid(font, "00000000000", ttfColor);
+            surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);
 
         }
     }
@@ -1263,7 +1264,7 @@ int PrepareGame()
 
   interface = 1;
   /*####*/
-  Sound = true;
+  Sound = false;
 
   /*Create Background*/
   makeBACKGROUND();
@@ -1320,7 +1321,7 @@ int PrepareGame()
   UISurface = surfaceMessage;
   ScoreElement = createELEMENT(
                 SCREEN_WIDTH/2 + 75,
-                SCREEN_HEIGHT - 24,
+                SCREEN_HEIGHT - 21,
                 0,
                 UISurface);
 
@@ -1366,7 +1367,6 @@ void printGrid(){
 void gridDown()
 {
     int i, j, ballcolor;
-    SDL_Delay(25);
 
     for (i = BALLY-1; i > 0; i--)
 	{
@@ -1466,7 +1466,7 @@ void checkAround(NPC* npc, int checkcolor)
 {
     int n;
 
-    SDL_Delay(25);
+    SDL_Delay(5*DELAY);
     RefreshScreen();
 
     /*
@@ -1632,7 +1632,7 @@ void DestroyIsland(int ScoreOn){
             }
             else{
                 if (ballgrid[i][j].color){
-                    SDL_Delay(25);
+                    SDL_Delay(5*DELAY);
                     RefreshScreen();
                     if(ScoreOn) Score += 100;
                 }
