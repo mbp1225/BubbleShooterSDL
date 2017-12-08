@@ -29,7 +29,7 @@
 
 #define WAV_PATH "./Sounds/Kick-Drum-1.wav"
 #define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
-#define TTF_PATH "./TTF/DS-DIGI.TTF"
+#define TTF_PATH "./TTF/pirulen.ttf"
 
 /*
  * Constants
@@ -809,7 +809,7 @@ void RefreshScreen()
         drawPLAYER(ball);
         drawELEMENT(SoundElement, 38, 38);
         drawELEMENT(EGelement, 38, 38);
-        drawELEMENT(ScoreElement, 100,100);
+        drawELEMENT(ScoreElement, 200, 38);
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -1320,7 +1320,7 @@ int PrepareGame()
   UISurface = surfaceMessage;
   ScoreElement = createELEMENT(
                 SCREEN_WIDTH/2 + 75,
-                SCREEN_HEIGHT - 23,
+                SCREEN_HEIGHT - 24,
                 0,
                 UISurface);
 
