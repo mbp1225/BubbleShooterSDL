@@ -29,7 +29,7 @@
 
 #define WAV_PATH "./Sounds/Kick-Drum-1.wav"
 #define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
-#define TTF_PATH "./TTF/fonteScore.ttf"
+#define TTF_PATH "./TTF/DS-DIGI.TTF"
 
 /*
  * Constants
@@ -367,7 +367,7 @@ NPC* collision()
         printf("Score = %d\n", Score);
 
         /*itoa(Score, scoreString, 10);*/
-        sprintf(scoreString, "%d", Score);
+        sprintf(scoreString, "%0 12d", Score);
         printf("String Score = %s\n", scoreString);
         surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
         ScoreElement.image = surfaceMessage;
@@ -664,9 +664,9 @@ void makeBACKGROUND()
     COLOR CODES
     0 = null
     1 = earth
-    2 = moon
+    2 = saturn
     3 = neptune
-    4 = uranus
+    4 = venus
     5 = jupiter
     6 = mars
 */
@@ -919,6 +919,7 @@ void MainMenu(){
 
 void Buttons(SDL_Event e){
     int Mx, My;
+    int ballcolor;
 
     SDL_GetMouseState( &Mx, &My );
     if(interface == 1){
@@ -980,6 +981,16 @@ void Buttons(SDL_Event e){
             if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
               interface = 1;
               play = 0;
+              ball.posX = (SCREEN_WIDTH/2 - IMAGE_WIDTH/2);
+              ball.posY = (SCREEN_HEIGHT - IMAGE_HEIGHT);
+              ball.stepX = 0;
+              ball.stepY = 0;
+              ballcolor = rand() % COLORS + 1;
+              ball.color = ballcolor;
+              ball.image = GetColor(ballcolor);
+              ballcolor = rand() % COLORS + 1;
+              nextball.image = GetColor(ballcolor);
+              nextball.color = ballcolor;
               ArrowElement.image = NULL;
               cleanGrid();
               makeBACKGROUND();
@@ -1129,12 +1140,12 @@ int init() {
             	return -1;
 
             /* Load TTF font */
-            font = TTF_OpenFont(TTF_PATH, 24);
+            font = TTF_OpenFont(TTF_PATH, 13);
             if(font == NULL)
                 return -1;
 
-            ttfColor.r = 245;
-            ttfColor.g = 245;
+            ttfColor.r = 127;
+            ttfColor.g = 243;
             ttfColor.b = 245;
 
         }
@@ -1247,7 +1258,8 @@ int PrepareGame()
 
 
   interface = 1;
-  Sound = true;
+  /*####*/
+  Sound = false;
 
   /*Create Background*/
   makeBACKGROUND();
@@ -1303,8 +1315,8 @@ int PrepareGame()
 
   UISurface = surfaceMessage;
   ScoreElement = createELEMENT(
-                SCREEN_WIDTH/2,
-                SCREEN_HEIGHT/2,
+                SCREEN_WIDTH/2 + 75,
+                SCREEN_HEIGHT - 23,
                 0,
                 UISurface);
 
@@ -1312,26 +1324,27 @@ int PrepareGame()
 }
 
 void PreparePlay(){
-      /*Create Ball Grid*/
-      maxhealth = 6;
-      health = maxhealth;
-      createGrid(GRIDY);
-      Score = 0;
-      play = 1;
+    /*Create Ball Grid*/
+    maxhealth = 6;
+    health = maxhealth;
+    Score = 0;
+    clicked = 0;
+    createGrid(GRIDY);
+    play = 1;
 }
 
 int PlayEnd(){
-  int i, j;
-  for(i=0; i<BALLY; i++){
-    for(j=0; j<BALLX; j++){
-      if(ballgrid[i][j].indexY==16){
-        play = 0;
-        cleanGrid();
-        return 1;
-      }
+    int i, j;
+    for(i=0; i<BALLY; i++){
+        for(j=0; j<BALLX; j++){
+            if(ballgrid[i][j].indexY==16){
+                play = 0;
+                cleanGrid();
+                return 1;
+            }
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 void printGrid(){
