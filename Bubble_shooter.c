@@ -154,7 +154,7 @@ UIELEMENT EGelement;
 /*Main Menu Arrou*/
 UIELEMENT ArrowElement;
 
-/*Score TTF*/
+/*Score TTF Element*/
 UIELEMENT ScoreElement;
 
 /*The TTF_Font*/
@@ -162,12 +162,6 @@ TTF_Font* font;
 
 /*The TTF Color*/
 SDL_Color ttfColor;
-
-/*The Message Surface*/
-SDL_Surface* surfaceMessage;
-
-/*The Message Rect*/
-SDL_Rect Message_rect;
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -183,9 +177,6 @@ SDL_Surface* BallSurface;
 
 /*The surface contained by the window*/
 SDL_Surface* gScreenSurface = NULL;
-
-/*Background Play UI surface*/
-SDL_Surface* PUI;
 
 /*Background*/
 BACKGROUND backg;
@@ -226,6 +217,9 @@ void movePLAYER();
 
 /*Gets ball color*/
 SDL_Surface* GetColor(int color);
+
+/*Gets Player Score*/
+void GetScore();
 
 /*checks ball collision*/
 NPC* checkCollision();
@@ -348,7 +342,7 @@ void movePLAYER()
 
 NPC* collision()
 {
-    char scoreString[30];
+    /*char scoreString[16];*/
     NPC *n;
 
     /*Checks if there's any NPC collision for it inside the function*/
@@ -368,11 +362,13 @@ NPC* collision()
         printGrid();
         printf("Score = %d\n", Score);
 
+        /*GetScore();*/
         /*itoa(Score, scoreString, 10);*/
-        sprintf(scoreString, "%012d", Score);
-        printf("String Score = %s\n", scoreString);
-        surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
+        /*sprintf(scoreString, "%012d", Score);
+        printf("String Score = %s\n", scoreString);*/
+        /*surfaceMessage = TTF_RenderText_Solid(font, "asd", ttfColor);
         ScoreElement.image = surfaceMessage;
+        SDL_FreeSurface(surfaceMessage);*/
     }
     return n;
 }
@@ -810,7 +806,7 @@ void RefreshScreen()
         drawPLAYER(ball);
         drawELEMENT(SoundElement, 38, 38);
         drawELEMENT(EGelement, 38, 38);
-        drawELEMENT(ScoreElement, 200, 38);
+        GetScore();
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -993,8 +989,8 @@ void Buttons(SDL_Event e){
               nextball.image = GetColor(ballcolor);
               nextball.color = ballcolor;
               ArrowElement.image = NULL;
-              surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);
-              ScoreElement.image = surfaceMessage;
+              /*surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);
+              ScoreElement.image = surfaceMessage;*/
               cleanGrid();
               makeBACKGROUND();
               EGelement.image = loadSurface("./Images/end.png");
@@ -1150,8 +1146,7 @@ int init() {
             ttfColor.r = 127;
             ttfColor.g = 243;
             ttfColor.b = 245;
-
-            surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);
+            /*surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);*/
 
         }
     }
@@ -1201,6 +1196,7 @@ void closing()
     /*Quit SDL subsystems*/
     IMG_Quit();
     SDL_Quit();
+    TTF_Quit();
 }
 
 SDL_Surface* loadSurface( char *path )
@@ -1318,12 +1314,12 @@ int PrepareGame()
                     0,
                     UISurface);
 
-  UISurface = surfaceMessage;
+  /*UISurface = surfaceMessage;
   ScoreElement = createELEMENT(
                 SCREEN_WIDTH/2 + 75,
                 SCREEN_HEIGHT - 21,
                 0,
-                UISurface);
+                UISurface);*/
 
   return 0;
 }
@@ -1647,4 +1643,28 @@ void DestroyIsland(int ScoreOn){
             }
         }
     /*printGrid();*/
+}
+
+void GetScore(){
+    /*The Message Surface*/
+    SDL_Surface* surfaceMessage;
+
+    /*The Message Rect*/
+    SDL_Rect Message_srcRect, Message_dstRect;
+
+    char scoreString[16];
+
+	Message_srcRect.x = 0;
+	Message_srcRect.y = 0;
+	Message_srcRect.w = 100;
+	Message_srcRect.h = 38;
+	Message_dstRect.x = SCREEN_WIDTH/2 + 75;
+	Message_dstRect.y = SCREEN_HEIGHT-21;
+
+    sprintf(scoreString, "%012d", Score);
+    /*printf("String Score = %s\n", scoreString);*/
+    surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
+    SDL_BlitSurface( surfaceMessage, &Message_srcRect, gScreenSurface, &Message_dstRect );
+    SDL_FreeSurface(surfaceMessage);
+    surfaceMessage = NULL;
 }
