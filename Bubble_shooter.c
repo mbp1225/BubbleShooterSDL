@@ -9,10 +9,7 @@
  * Nome: Matheus Pinheiro
  * DRE: 117249179
  *
- * Nome: Rafael da Silva Fernandes
- * DRE: 117196229
- *
- * Grupo: Eduardo Melo, Matheus Pinheiro, Rafael Fernandes
+ * Grupo: Eduardo Melo, Matheus Pinheiro
  *
  */
 
@@ -151,17 +148,8 @@ UIELEMENT SoundElement;
 /*End Game element*/
 UIELEMENT EGelement;
 
-/*Main Menu Arrou*/
+/*Main Menu Arrow*/
 UIELEMENT ArrowElement;
-
-/*Score TTF Element*/
-UIELEMENT ScoreElement;
-
-/*The TTF_Font*/
-TTF_Font* font;
-
-/*The TTF Color*/
-SDL_Color ttfColor;
 
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
@@ -361,14 +349,6 @@ NPC* collision()
         health--;
         printGrid();
         printf("Score = %d\n", Score);
-
-        /*GetScore();*/
-        /*itoa(Score, scoreString, 10);*/
-        /*sprintf(scoreString, "%012d", Score);
-        printf("String Score = %s\n", scoreString);*/
-        /*surfaceMessage = TTF_RenderText_Solid(font, "asd", ttfColor);
-        ScoreElement.image = surfaceMessage;
-        SDL_FreeSurface(surfaceMessage);*/
     }
     return n;
 }
@@ -803,10 +783,10 @@ void RefreshScreen()
 
     /*Play Refresh Screen*/
     if(interface == 2){
+        GetScore();
         drawPLAYER(ball);
         drawELEMENT(SoundElement, 38, 38);
         drawELEMENT(EGelement, 38, 38);
-        GetScore();
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
@@ -816,7 +796,6 @@ void RefreshScreen()
         for (i=0; i < health; i++)
             drawELEMENT(lifeballs[i], 8, 8);
     }
-
 
     /*Update the surface*/
     SDL_UpdateWindowSurface( gWindow );
@@ -1126,26 +1105,18 @@ int init() {
 
             /*Initialize SDL_mixer */
             if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
-            	return -1;
+            	success = false;
 
             /* Load our sound effect */
             wave = Mix_LoadWAV(WAV_PATH);
             if (wave == NULL)
-            	return -1;
+            	success = false;
 
             /* Load our music */
             music = Mix_LoadMUS(MUS_PATH);
             if (music == NULL)
-            	return -1;
+            	success = false;
 
-            /* Load TTF font */
-            font = TTF_OpenFont(TTF_PATH, 10);
-            if(font == NULL)
-                return -1;
-
-            ttfColor.r = 127;
-            ttfColor.g = 243;
-            ttfColor.b = 245;
             /*surfaceMessage = TTF_RenderText_Solid(font, "000000000000", ttfColor);*/
 
         }
@@ -1178,25 +1149,68 @@ int loadMedia()
 
 void closing()
 {
+    int i, j;
+    printf("entered closing\n");
+    SDL_FreeSurface(gScreenSurface);
+    gScreenSurface = NULL;
+
+    printf("freed Screen surface\n");
+
     /*Free loaded image*/
     SDL_FreeSurface( BallSurface );
-    BallSurface = NULL;
+    printf("freed ballsurface\n");
+
+    for (i=0; i<BALLY; i++)
+        for(j=0; j<BALLX; j++)
+            SDL_FreeSurface(ballgrid[i][j].image);
+
+    printf("freed all npc surfaces\n");
+    SDL_FreeSurface(ball.image);
+
+    printf("freed ball,npc surface\n");
+
+    SDL_FreeSurface(nextball.image);
+    printf("freed nextball surface\n");
+
+    for (i=0; i<6; i++)
+        SDL_FreeSurface(lifeballs[i].image);
+    printf("freed lifeballs surfaces\n");
+
+    SDL_FreeSurface(SoundElement.image);
+    printf("freed soundelement surface\n");
+
+    SDL_FreeSurface(EGelement.image);
+    printf("freed EGelement surface\n");
+
+    SDL_FreeSurface(ArrowElement.image);
+    printf("freed arrow element surface\n");
+
+    SDL_FreeSurface(backg.image);
+    printf("freed bakcground image surface\n");
 
     /*Destroy window*/
     SDL_DestroyWindow( gWindow );
     gWindow = NULL;
+    printf("freed gWindou\n");
 
     /* clean up our resources */
-	Mix_FreeChunk(wave);
+	/*Mix_FreeChunk(wave);*/
 	Mix_FreeMusic(music);
+    printf("freed music\n");
 
 	/* quit SDL_mixer */
 	Mix_CloseAudio();
+    printf("closed audio\n");
 
     /*Quit SDL subsystems*/
     IMG_Quit();
-    SDL_Quit();
+    printf("quitted img\n");
     TTF_Quit();
+    printf("quitted ttf\n");
+    Mix_Quit();
+    printf("quitted mix\n");
+    SDL_Quit();
+    printf("quitted SDL");
 }
 
 SDL_Surface* loadSurface( char *path )
@@ -1307,19 +1321,13 @@ int PrepareGame()
                   0,
                   UISurface);
 
-  UISurface = NULL;
   ArrowElement = createELEMENT(
                     72,
                     -38,
                     0,
-                    UISurface);
+                    NULL);
 
-  /*UISurface = surfaceMessage;
-  ScoreElement = createELEMENT(
-                SCREEN_WIDTH/2 + 75,
-                SCREEN_HEIGHT - 21,
-                0,
-                UISurface);*/
+  SDL_FreeSurface(UISurface);
 
   return 0;
 }
@@ -1369,7 +1377,7 @@ void gridDown()
 		for (j=1; j < GRIDX; j++)
 		{
             if (ballgrid[i][j].color){
-                SDL_FreeSurface(ballgrid[i][j].image);
+                /*SDL_FreeSurface(ballgrid[i][j].image);*/
     			ballgrid[i+1][j] = createNPC(
     				(i+1)*(IMAGE_HEIGHT - 5),
     				j*IMAGE_WIDTH + ((i+1)%2 * IMAGE_WIDTH/2) - IMAGE_WIDTH/4,
@@ -1483,7 +1491,7 @@ void checkAround(NPC* npc, int checkcolor)
                 npc->color = 0;
                 Score += 20;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n].color = 0;
-                SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n].image);
+                /*SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n].image);*/
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n], checkcolor);
             }
             /*case 1*/
@@ -1491,7 +1499,7 @@ void checkAround(NPC* npc, int checkcolor)
                 npc->color = 0;
                 Score += 20;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n].color = 0;
-                SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n].image);
+                /*SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n].image);*/
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n], checkcolor);
             }
             /*case 6*/
@@ -1499,7 +1507,7 @@ void checkAround(NPC* npc, int checkcolor)
                 npc->color = 0;
                 Score += 20;
                 ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].color = 0;
-                SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].image);
+                /*SDL_FreeSurface(ballgrid[(npc->indexY)-1][(npc->indexX)+n-1].image);*/
                 checkAround (&ballgrid[(npc->indexY)-1][(npc->indexX)+n-1], checkcolor);
             }
             /*case 4*/
@@ -1507,7 +1515,7 @@ void checkAround(NPC* npc, int checkcolor)
                 npc->color = 0;
                 Score += 20;
                 ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].color = 0;
-                SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].image);
+                /*SDL_FreeSurface(ballgrid[(npc->indexY)+1][(npc->indexX)+n-1].image);*/
                 checkAround (&ballgrid[(npc->indexY)+1][(npc->indexX)+n-1], checkcolor);
             }
         }
@@ -1517,7 +1525,7 @@ void checkAround(NPC* npc, int checkcolor)
         npc->color = 0;
         Score += 20;
         ballgrid[(npc->indexY)][(npc->indexX)-1].color = 0;
-        SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)-1].image);
+        /*SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)-1].image);*/
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)-1], checkcolor);
     }
     /*case 5*/
@@ -1525,7 +1533,7 @@ void checkAround(NPC* npc, int checkcolor)
         npc->color = 0;
         Score += 20;
         ballgrid[(npc->indexY)][(npc->indexX)+1].color = 0;
-        SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);
+        /*SDL_FreeSurface(ballgrid[(npc->indexY)][(npc->indexX)+1].image);*/
         checkAround (&ballgrid[(npc->indexY)][(npc->indexX)+1], checkcolor);
     }
 
@@ -1646,25 +1654,45 @@ void DestroyIsland(int ScoreOn){
 }
 
 void GetScore(){
+    /*The TTF_Font*/
+    TTF_Font* font = NULL;
+
+    /*The TTF Color*/
+    SDL_Color ttfColor;
+
     /*The Message Surface*/
-    SDL_Surface* surfaceMessage;
+    SDL_Surface* surfaceMessage = NULL;
 
     /*The Message Rect*/
-    SDL_Rect Message_srcRect, Message_dstRect;
+    SDL_Rect Message_Rect;
 
     char scoreString[16];
 
-	Message_srcRect.x = 0;
-	Message_srcRect.y = 0;
-	Message_srcRect.w = 100;
-	Message_srcRect.h = 38;
-	Message_dstRect.x = SCREEN_WIDTH/2 + 75;
-	Message_dstRect.y = SCREEN_HEIGHT-21;
+    /* Load TTF font */
+    font = TTF_OpenFont(TTF_PATH, 10);
+    if(font == NULL)
+        exit(748);
+
+    ttfColor.r = 127;
+    ttfColor.g = 243;
+    ttfColor.b = 245;
+
+
+	Message_Rect.x = SCREEN_WIDTH/2 + 75;
+	Message_Rect.y = SCREEN_HEIGHT-21;
+	Message_Rect.w = 100;
+	Message_Rect.h = 38;
 
     sprintf(scoreString, "%012d", Score);
     /*printf("String Score = %s\n", scoreString);*/
-    surfaceMessage = TTF_RenderText_Solid(font, scoreString, ttfColor);
-    SDL_BlitSurface( surfaceMessage, &Message_srcRect, gScreenSurface, &Message_dstRect );
+    surfaceMessage = TTF_RenderText_Solid(font,scoreString, ttfColor);
+    if(!surfaceMessage){
+        printf("Failed to render Text!\n");
+        /*exit(734);*/
+    }
+    SDL_BlitSurface( surfaceMessage, NULL, gScreenSurface, &Message_Rect );
     SDL_FreeSurface(surfaceMessage);
-    surfaceMessage = NULL;
+
+    TTF_CloseFont( font );
+    /*surfaceMessage = NULL;*/
 }
