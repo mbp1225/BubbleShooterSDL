@@ -1149,7 +1149,7 @@ int loadMedia()
 
 void closing()
 {
-    int i, j;
+    /*int i, j;*/
     printf("entered closing\n");
     SDL_FreeSurface(gScreenSurface);
     gScreenSurface = NULL;
@@ -1157,50 +1157,59 @@ void closing()
     printf("freed Screen surface\n");
 
     /*Free loaded image*/
-    SDL_FreeSurface( BallSurface );
+    if(BallSurface != NULL)
+        SDL_FreeSurface( BallSurface );
     printf("freed ballsurface\n");
 
-    for (i=0; i<BALLY; i++)
+    /*for (i=0; i<BALLY; i++)
         for(j=0; j<BALLX; j++)
-            SDL_FreeSurface(ballgrid[i][j].image);
+            if(ballgrid[i][j].image != NULL)*/
+                /*SDL_FreeSurface(ballgrid[i][j].image);*/
+    /*printf("freed all npc surfaces\n");*/
 
-    printf("freed all npc surfaces\n");
-    SDL_FreeSurface(ball.image);
+    if(ball.image != NULL)
+        /*SDL_FreeSurface(ball.image);*/
+    printf("freed ball.npc surface\n");
 
-    printf("freed ball,npc surface\n");
-
-    SDL_FreeSurface(nextball.image);
+    if(nextball.image != NULL)
+        SDL_FreeSurface(nextball.image);
     printf("freed nextball surface\n");
 
-    for (i=0; i<6; i++)
-        SDL_FreeSurface(lifeballs[i].image);
-    printf("freed lifeballs surfaces\n");
+    /*for (i=0; i<6; i++)
+        if(lifeballs[i].image != NULL)
+            SDL_FreeSurface(lifeballs[i].image);
+    printf("freed lifeballs surfaces\n");*/
 
-    SDL_FreeSurface(SoundElement.image);
+    if (SoundElement.image != NULL)
+        SDL_FreeSurface(SoundElement.image);
     printf("freed soundelement surface\n");
 
-    SDL_FreeSurface(EGelement.image);
+    if (EGelement.image != NULL)
+        SDL_FreeSurface(EGelement.image);
     printf("freed EGelement surface\n");
 
-    SDL_FreeSurface(ArrowElement.image);
+    if (EGelement.image != NULL)
+        SDL_FreeSurface(ArrowElement.image);
     printf("freed arrow element surface\n");
 
-    SDL_FreeSurface(backg.image);
+    if (EGelement.image != NULL)
+        SDL_FreeSurface(backg.image);
     printf("freed bakcground image surface\n");
 
     /*Destroy window*/
     SDL_DestroyWindow( gWindow );
     gWindow = NULL;
-    printf("freed gWindou\n");
+    printf("freed gWindow\n");
 
     /* clean up our resources */
 	/*Mix_FreeChunk(wave);*/
-	Mix_FreeMusic(music);
-    printf("freed music\n");
+    /*if(music != NULL)
+	   Mix_FreeMusic(music);
+    printf("freed music\n");*/
 
 	/* quit SDL_mixer */
-	Mix_CloseAudio();
-    printf("closed audio\n");
+	/*Mix_CloseAudio();
+    printf("closed audio\n");*/
 
     /*Quit SDL subsystems*/
     IMG_Quit();
@@ -1210,7 +1219,7 @@ void closing()
     Mix_Quit();
     printf("quitted mix\n");
     SDL_Quit();
-    printf("quitted SDL");
+    printf("quitted SDL\n");
 }
 
 SDL_Surface* loadSurface( char *path )
@@ -1286,7 +1295,7 @@ int PrepareGame()
                     0,
                     0,
                     ballcolor,
-                    BallSurface);
+                    GetColor(ballcolor));
 
   /*Create nextball*/
   ballcolor = rand() % COLORS + 1;
@@ -1296,7 +1305,7 @@ int PrepareGame()
               (SCREEN_WIDTH/4 ) - 6,
               (SCREEN_HEIGHT - IMAGE_HEIGHT),
               ballcolor,
-              BallSurface);
+              GetColor(ballcolor));
 
   UISurface = loadSurface( "./Images/Life.png" );
   for(i=0; i<6; i++){
