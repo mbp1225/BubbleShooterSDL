@@ -217,6 +217,9 @@ void GetScore();
 /*Gets Threat Level*/
 void GetThreatLevel();
 
+/*Gets Life Surface*/
+void GetLifeSurface();
+
 /*checks ball collision*/
 NPC* checkCollision();
 
@@ -357,6 +360,7 @@ NPC* collision()
         health--;
         printGrid();
         GetThreatLevel();
+        GetLifeSurface();
 
         printf("Score = %d\nThreatLevel = %d\n", Score, ThreatLevel);
     }
@@ -804,8 +808,9 @@ void RefreshScreen()
                 drawNPC(ballgrid[i][j]);
         drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-        for (i=0; i < health; i++)
+        for (i=0; i < health; i++){
             drawELEMENT(lifeballs[i], 8, 10);
+        }
     }
 
     /*Update the surface*/
@@ -1080,6 +1085,7 @@ void Play(){
           gridDown();
           maxhealth --;
           health = maxhealth;
+          GetLifeSurface();
     }
 
     if (PlayEnd()==1){
@@ -1378,6 +1384,7 @@ void PreparePlay(){
     maxhealth = 5;
     ThreatLevel = 1;
     health = maxhealth;
+    GetLifeSurface();
     Score = 0;
     clicked = 0;
     createGrid(GRIDY);
@@ -1461,6 +1468,7 @@ void gridDown()
     /*printGrid();*/
     DestroyIsland(false);
     GetThreatLevel();
+    GetLifeSurface();
 }
 
 void checkIsland(NPC* npc)
@@ -1712,30 +1720,36 @@ void GetThreatLevel(){
             EGelement.image = loadSurface( "./Images/menuBlue.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnBlue.png");
             else SoundElement.image = loadSurface("./Images/soundOffBlue.png");
-            for(i=0; i<5; i++){
-                if (lifeballs[i].image != NULL)
-                    lifeballs[i].image = loadSurface( "./Images/LifeBlue.png" );
-            }
         break;
         case 2:
             PMUI.image = loadSurface( "./Images/uiYellow.png");
             EGelement.image = loadSurface( "./Images/menuYellow.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnYellow.png");
             else SoundElement.image = loadSurface("./Images/soundOffYellow.png");
-            for(i=0; i<5; i++){
-                if (lifeballs[i].image != NULL)
-                    lifeballs[i].image = loadSurface( "./Images/LifeYellow.png" );
-            }
         break;
         case 3:
             PMUI.image = loadSurface( "./Images/uiRed.png");
             EGelement.image = loadSurface( "./Images/menuRed.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnRed.png");
             else SoundElement.image = loadSurface("./Images/soundOffRed.png");
-            for(i=0; i<5; i++){
-                if (lifeballs[i].image != NULL)
-                    lifeballs[i].image = loadSurface( "./Images/LifeRed.png" );
-            }
+        break;
+    }
+}
+
+void GetLifeSurface(){
+    int i;
+    switch(ThreatLevel){
+        case 1:
+            for(i=0; i<health; i++)
+                lifeballs[i].image = loadSurface( "./Images/LifeBlue.png" );
+        break;
+        case 2:
+            for(i=0; i<health; i++)
+                lifeballs[i].image = loadSurface( "./Images/LifeYellow.png" );
+        break;
+        case 3:
+            for(i=0; i<health; i++)
+                lifeballs[i].image = loadSurface( "./Images/LifeRed.png" );
         break;
     }
 }
