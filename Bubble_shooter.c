@@ -140,7 +140,7 @@ PLAYER ball;
 UIELEMENT nextball;
 
 /*Life elements*/
-UIELEMENT lifeballs[6];
+UIELEMENT lifeballs[5];
 
 /*Sound on/off element*/
 UIELEMENT SoundElement;
@@ -805,7 +805,7 @@ void RefreshScreen()
         drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
 
         for (i=0; i < health; i++)
-            drawELEMENT(lifeballs[i], 8, 8);
+            drawELEMENT(lifeballs[i], 8, 10);
     }
 
     /*Update the surface*/
@@ -1073,10 +1073,10 @@ void Play(){
         /*checkAround(n);*/
 	}
 
-    if(maxhealth == 1){
-      maxhealth = 7;
+    if(maxhealth == 0){
+      maxhealth = 6;
     }
-      if (!health){
+      if (health<0){
           gridDown();
           maxhealth --;
           health = maxhealth;
@@ -1339,12 +1339,12 @@ int PrepareGame()
               ballcolor,
               GetColor(ballcolor));
 
-  for(i=0; i<6; i++){
+  for(i=0; i<5; i++){
     lifeballs[i] = createELEMENT(
-                    (SCREEN_WIDTH/3) - 24 + (i*18),
-                    (SCREEN_HEIGHT - IMAGE_HEIGHT) +12,
+                    (SCREEN_WIDTH/3) - 24 + (i*7) + 56,
+                    (i%2)?(SCREEN_HEIGHT - IMAGE_HEIGHT) + 13:(SCREEN_HEIGHT - IMAGE_HEIGHT) +1,
                     0,
-                    loadSurface( "./Images/Life.png" ));
+                    loadSurface("./Images/LifeBlue.png"));
   }
 
   SoundElement = createELEMENT(
@@ -1375,7 +1375,7 @@ int PrepareGame()
 
 void PreparePlay(){
     /*Create Ball Grid*/
-    maxhealth = 6;
+    maxhealth = 5;
     ThreatLevel = 1;
     health = maxhealth;
     Score = 0;
@@ -1712,18 +1712,30 @@ void GetThreatLevel(){
             EGelement.image = loadSurface( "./Images/menuBlue.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnBlue.png");
             else SoundElement.image = loadSurface("./Images/soundOffBlue.png");
+            for(i=0; i<5; i++){
+                if (lifeballs[i].image != NULL)
+                    lifeballs[i].image = loadSurface( "./Images/LifeBlue.png" );
+            }
         break;
         case 2:
             PMUI.image = loadSurface( "./Images/uiYellow.png");
             EGelement.image = loadSurface( "./Images/menuYellow.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnYellow.png");
             else SoundElement.image = loadSurface("./Images/soundOffYellow.png");
+            for(i=0; i<5; i++){
+                if (lifeballs[i].image != NULL)
+                    lifeballs[i].image = loadSurface( "./Images/LifeYellow.png" );
+            }
         break;
         case 3:
             PMUI.image = loadSurface( "./Images/uiRed.png");
             EGelement.image = loadSurface( "./Images/menuRed.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnRed.png");
             else SoundElement.image = loadSurface("./Images/soundOffRed.png");
+            for(i=0; i<5; i++){
+                if (lifeballs[i].image != NULL)
+                    lifeballs[i].image = loadSurface( "./Images/LifeRed.png" );
+            }
         break;
     }
 }
