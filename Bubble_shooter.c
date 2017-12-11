@@ -1076,11 +1076,37 @@ void Buttons(SDL_Event e){
               if(ThreatLevel == 1) EGMen.image = loadSurface("./Images/menuBlue.png");
           }
 
-          /*Ranking Button*/
-          if(Mx < () && Mx > ()
-          && My < () && My > ()) /*##########################*/
-
           /*Replay Button*/
+          if(Mx < (335) && Mx > (305)
+          && My < (306) && My > (272)){
+              if(ThreatLevel == 3) EGR.image = loadSurface("./Images/returnHoverRed.png");
+              if(ThreatLevel == 1) EGR.image = loadSurface("./Images/returnHoverBlue.png");
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                EGUI.image = NULL;
+                EGR.image = NULL;
+                EGRank.image = NULL;
+                EGMen.image = NULL;
+                play = 0;
+                /*PreparePlay();*/
+            }
+          }
+          else{
+              if(ThreatLevel == 3) EGR.image = loadSurface("./Images/returnRed.png");
+              if(ThreatLevel == 1) EGR.image = loadSurface("./Images/returnBlue.png");
+          }
+
+          /*Ranking Button
+          372, 30
+          238, 34*/
+          if(Mx < (402) && Mx > (372)
+          && My < (274) && My > (238)){
+              if(ThreatLevel == 3) EGRank.image = loadSurface("./Images/rankHoverRed.png");
+              if(ThreatLevel == 1) EGRank.image = loadSurface("./Images/rankHoverBlue.png");
+          }
+          else{
+              if(ThreatLevel == 3) EGRank.image = loadSurface("./Images/rankRed.png");
+              if(ThreatLevel == 1) EGRank.image = loadSurface("./Images/rankBlue.png");
+          }
     }
 }
 
