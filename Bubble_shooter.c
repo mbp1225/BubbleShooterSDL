@@ -1394,17 +1394,24 @@ void PreparePlay(){
 }
 
 int PlayEnd(){
-    int i, j;
-    for(i=0; i<BALLY; i++){
-        for(j=0; j<BALLX; j++){
-            if(ballgrid[i][j].indexY==16){
-                play = 0;
-                cleanGrid();
-                return 1;
-            }
+    int i, j, stop = false;
+    for(i=16, j=0; j<BALLX; j++){
+        if(ballgrid[i][j].color){
+            stop = true;
+            break;
         }
     }
-    return 0;
+    if (!stop) return 0;
+    for (i=1; i<BALLY-1; i++){
+        for(j=1; j<GRIDX; j++){
+            ballgrid[i][j].color = 0;
+        }
+        SDL_Delay(DELAY*5);
+        RefreshScreen();
+    }
+    play = 0;
+    cleanGrid();
+    return 1;
 }
 
 void printGrid(){
