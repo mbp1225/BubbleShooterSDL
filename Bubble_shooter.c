@@ -263,7 +263,10 @@ void DestroyIsland(int ScoreOn);
 int PrepareGame();
 
 /*Finishes play mode*/
-int PlayEnd(SDL_Event e);
+int PlayEnd();
+
+/*Checks play mode win*/
+int PlayWin();
 
 /*Prints the screen surface and its updates*/
 void RefreshScreen(void);
@@ -299,7 +302,7 @@ void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 void Game();
 
 /*End Game UI Function*/
-void EndGameUI(SDL_Event e);
+void EndGameUI();
 
 /*Prepare play Function*/
 void PreparePlay();
@@ -376,6 +379,10 @@ NPC* collision()
         printGrid();
         GetThreatLevel();
         GetLifeSurface();
+
+        if (PlayWin()){
+            printf("\nnão fez mais que a sua obrigação\n");
+        }
 
         printf("Score = %d\nThreatLevel = %d\n", Score, ThreatLevel);
     }
@@ -1131,7 +1138,7 @@ void Play(){
             {
                 case SDLK_UP: /* printf("UP\n"); */
                 break;
-                case SDLK_DOWN: gridDown();
+                case SDLK_DOWN: if(play == 1) gridDown();
                 break;
                 case SDLK_ESCAPE: quit = true;
                 break;
@@ -1155,15 +1162,14 @@ void Play(){
           maxhealth --;
           health = maxhealth;
           GetLifeSurface();
-    }
+      }
 
-    if (PlayEnd(e)==1){
-      printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
-      /*interface = 1;*/
-      /*ThreatLevel = 1;*/
-      /*makeBACKGROUND();*/
-    }
-
+      if(PlayEnd() == 1){
+            printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            /*interface = 1;*/
+            /*ThreatLevel = 1;*/
+            /*makeBACKGROUND();*/
+      }
 }
 
 int init() {
@@ -1487,7 +1493,24 @@ void PreparePlay(){
     play = 1;
 }
 
-int PlayEnd(SDL_Event e){
+int PlayWin(){
+    int i, j;
+    for(i=1, j=0; j<BALLX; j++){
+        if(ballgrid[i][j].color){
+            return 0;
+        }
+    }
+    ball.image = NULL;
+    nextball.image = NULL;
+    clicked = 1;
+    play = -1;
+    Score<<=1;
+    cleanGrid();
+    EndGameUI();
+    return 1;
+}
+
+int PlayEnd(){
     int i, j, stop = false;
     for(i=16, j=0; j<BALLX; j++){
         if(ballgrid[i][j].color){
@@ -1508,7 +1531,7 @@ int PlayEnd(SDL_Event e){
     clicked = 1;
     play = -1;
     cleanGrid();
-    EndGameUI(e);
+    EndGameUI();
     return 1;
 }
 
@@ -1738,6 +1761,9 @@ void checkDestruction(NPC* npc, int checkcolor)
         currentCount = 0;
         health++;
         printf("Destruiu!\n");
+        if (PlayWin()){
+            printf("\nnão fez mais que a sua obrigação\n");
+        }
         return;
     }
     /*
@@ -1919,7 +1945,7 @@ void GetScore(){
     /*surfaceMessage = NULL;*/
 }
 
-void EndGameUI(SDL_Event e){
+void EndGameUI(){
     int Mx, My;
     switch(ThreatLevel){
         case 1:
