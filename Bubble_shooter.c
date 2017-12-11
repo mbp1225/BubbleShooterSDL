@@ -123,6 +123,7 @@ int health = 0;
 int maxhealth = 0;
 int Sound;
 int Score;
+char NickString[16];
 
 /*The window we'll be rendering to*/
 SDL_Window* gWindow = NULL;
@@ -199,6 +200,8 @@ int init();
 /*Loads media*/
 int loadMedia();
 
+int getstring = 1;
+
 /*Frees media and shuts down SDL*/
 void closing();
 
@@ -225,6 +228,9 @@ SDL_Surface* GetColor(int color);
 
 /*Gets Player Score*/
 void GetScore();
+
+/*Gets player nick string*/
+void GetInput(SDL_Event e);
 
 /*Gets Threat Level*/
 void GetThreatLevel();
@@ -918,6 +924,24 @@ void Game(){
 }
 
 void MainMenu(){
+    SDL_Event e;
+
+    while( SDL_PollEvent(&e) != 0)
+    {
+        Buttons(e);
+        switch(e.type){
+            case SDL_QUIT:
+                quit = true;
+            break;
+            case SDL_KEYDOWN:
+                if(e.key.keysym.sym == SDLK_ESCAPE)
+                    quit = true;
+            break;
+        }
+    }
+}
+
+void Highscores(){
     SDL_Event e;
 
     while( SDL_PollEvent(&e) != 0)
@@ -1892,12 +1916,14 @@ void GetLifeSurface(){
 void GetScore(){
     /*The TTF_Font*/
     TTF_Font* font = NULL;
+    TTF_Font* bigfont = NULL;
 
     /*The TTF Color*/
     SDL_Color ttfColor;
 
     /*The Message Surface*/
     SDL_Surface* surfaceMessage = NULL;
+    SDL_Surface* bigSurface = NULL;
 
     /*The Message Rect*/
     SDL_Rect Message_Rect;
@@ -1938,8 +1964,21 @@ void GetScore(){
         printf("Failed to render Text!\n");
         /*exit(734);*/
     }
+
     SDL_BlitSurface( surfaceMessage, NULL, gScreenSurface, &Message_Rect );
     SDL_FreeSurface(surfaceMessage);
+
+    if (play == -1){
+        bigfont = TTF_OpenFont(TTF_PATH, 20);
+        Message_Rect.x = SCREEN_WIDTH/2 - 115;
+        Message_Rect.y = SCREEN_HEIGHT/2 + 90;
+        Message_Rect.w = 200;
+        Message_Rect.h = 76;
+        sprintf(scoreString, "Score: %08d", Score);
+        bigSurface = TTF_RenderText_Solid(bigfont,scoreString, ttfColor);
+        SDL_BlitSurface(bigSurface, NULL, gScreenSurface, &Message_Rect);
+        TTF_CloseFont( bigfont );
+    }
 
     TTF_CloseFont( font );
     /*surfaceMessage = NULL;*/
@@ -1967,22 +2006,71 @@ void EndGameUI(){
 
 }
 
-/*
-EGMen = createELEMENT(
-                   238,
-                   238,
-                   0,
-                   NULL);
+void GetInput(SDL_Event e){
+    /*The TTF_Font*/
+    TTF_Font* font = NULL;
 
-EGR = createELEMENT(
-                   305,
-                   272,
-                   0,
-                   NULL);
+    /*The TTF Color*/
+    SDL_Color ttfColor;
 
-EGRank = createELEMENT(
-                   372,
-                   238,
-                   0,
-                   NULL);
-*/
+    /*The Message Surface*/
+    SDL_Surface* NickSurface = NULL;
+
+    /*The Message Rect*/
+    SDL_Rect Message_Rect;
+
+    printf("%s\n", NickString);
+
+    /* Load TTF font */
+    font = TTF_OpenFont(TTF_PATH, 20);
+    if(font == NULL)
+        exit(748);
+
+    switch(ThreatLevel){
+        case 1: ttfColor.r = 145;
+                ttfColor.g = 223;
+                ttfColor.b = 224;
+        break;
+        case 2:
+                ttfColor.r = 213;
+                ttfColor.g = 216;
+                ttfColor.b = 118;
+        break;
+        case 3:
+                ttfColor.r = 224;
+                ttfColor.g = 68;
+                ttfColor.b = 68;
+        break;
+    }
+
+	Message_Rect.x = SCREEN_WIDTH/2;
+	Message_Rect.y = SCREEN_HEIGHT/2;
+	Message_Rect.w = 100;
+	Message_Rect.h = 76;
+
+            switch(e.type){
+                case SDL_TEXTINPUT:
+                    if(strlen(NickString)<16){
+                        strcat(NickString, e.text.text);
+                    }
+                break;
+                case SDL_KEYDOWN:
+                    switch(e.key.keysym.sym){
+                        case SDLK_BACKSPACE:
+                            NickString[strlen(NickString)-1] = '\0';
+                        break;
+                        case SDLK_RETURN:
+                            getstring = false;
+                        break;
+                    }
+                break;
+            }
+
+
+        /*NickString[i+1] = '\0';*/
+        NickSurface = TTF_RenderText_Solid(font, NickString, ttfColor);
+        SDL_BlitSurface( NickSurface, NULL, gScreenSurface, &Message_Rect );
+        SDL_FreeSurface(NickSurface);
+
+        TTF_CloseFont( font );
+}
