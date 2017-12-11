@@ -802,15 +802,15 @@ void RefreshScreen()
         drawPLAYER(ball);
         drawELEMENT(SoundElement, 38, 38);
         drawELEMENT(EGelement, 38, 38);
+        for (i=0; i < health; i++){
+            drawELEMENT(lifeballs[i], 8, 10);
+        }
 
         for (i = 0; i < BALLY; i++)
             for (j = 0; j < BALLX; j++)
                 drawNPC(ballgrid[i][j]);
         drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-        for (i=0; i < health; i++){
-            drawELEMENT(lifeballs[i], 8, 10);
-        }
     }
 
     /*Update the surface*/
