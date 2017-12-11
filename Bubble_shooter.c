@@ -27,7 +27,7 @@
 #define DELAY 5
 
 #define WAV_PATH "./Sounds/Kick-Drum-1.wav"
-#define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix) -.mp3"
+#define MUS_PATH "./Sounds/NES Ver. BAYONETTA - Fly Me To The Moon ( Climax Mix ).mp3"
 #define TTF_PATH "./TTF/Graph-35-pix.ttf"
 
 /*
@@ -48,7 +48,7 @@ const int MSPEED = 8;
 const int COLRADIUS = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 6;
+const int COLORS = 2;
 
 /*Ballgrid size*/
 const int BALLX = 20;
@@ -154,6 +154,18 @@ UIELEMENT ArrowElement;
 /*PlayMode UI*/
 UIELEMENT PMUI;
 
+/*EndGame UI*/
+UIELEMENT EGUI;
+
+/*EndGame Sound*/
+UIELEMENT EGR;
+
+/*EndGame MainMenu*/
+UIELEMENT EGMen;
+
+/*EndGame Ranking*/
+UIELEMENT EGRank;
+
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
 
@@ -251,7 +263,7 @@ void DestroyIsland(int ScoreOn);
 int PrepareGame();
 
 /*Finishes play mode*/
-int PlayEnd();
+int PlayEnd(SDL_Event e);
 
 /*Prints the screen surface and its updates*/
 void RefreshScreen(void);
@@ -285,6 +297,9 @@ void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 
 /*Game Function*/
 void Game();
+
+/*End Game UI Function*/
+void EndGameUI(SDL_Event e);
 
 /*Prepare play Function*/
 void PreparePlay();
@@ -811,6 +826,13 @@ void RefreshScreen()
                 drawNPC(ballgrid[i][j]);
         drawELEMENT(nextball, IMAGE_WIDTH, IMAGE_HEIGHT);
 
+        if(play == -1){
+            drawELEMENT(EGUI, 200, 200);
+            drawELEMENT(EGMen, 38, 38);
+            drawELEMENT(EGR, 38, 38);
+            drawELEMENT(EGRank, 38, 38);
+        }
+
     }
 
     /*Update the surface*/
@@ -878,9 +900,6 @@ void Game(){
             MainMenu();
             break;
         case 2: /*Play*/
-            if(!play){
-                PreparePlay();
-            }
             Play();
             break;
         case 3: /*Highscores*/
@@ -965,8 +984,9 @@ void Buttons(SDL_Event e){
 
     if(interface == 2){
         /*End Game Button*/
-        if(Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
-        && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38)){
+        if((Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
+        && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38))
+        || (Mx < (268) && Mx > (238) && My < (274) && My > (238) )){
             if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
               interface = 1;
               play = 0;
@@ -988,19 +1008,21 @@ void Buttons(SDL_Event e){
               EGelement.image = loadSurface("./Images/menuBlue.png");
               /*interface = 3*/
             }
-            switch(ThreatLevel){
-                case 1: EGelement.image = loadSurface("./Images/menuHoverBlue.png"); break;
-                case 2: EGelement.image = loadSurface("./Images/menuHoverYellow.png"); break;
-                case 3: EGelement.image = loadSurface("./Images/menuHoverRed.png"); break;
+            if(!(Mx < (268) && Mx > (238) && My < (274) && My > (238) )){
+                switch(ThreatLevel){
+                    case 1: EGelement.image = loadSurface("./Images/menuHoverBlue.png"); break;
+                    case 2: EGelement.image = loadSurface("./Images/menuHoverYellow.png"); break;
+                    case 3: EGelement.image = loadSurface("./Images/menuHoverRed.png"); break;
+                }
             }
         }
-        else{
-            switch(ThreatLevel){
-                case 1: EGelement.image = loadSurface("./Images/menuBlue.png"); break;
-                case 2: EGelement.image = loadSurface("./Images/menuYellow.png"); break;
-                case 3: EGelement.image = loadSurface("./Images/menuRed.png"); break;
+            else{
+                switch(ThreatLevel){
+                    case 1: EGelement.image = loadSurface("./Images/menuBlue.png"); break;
+                    case 2: EGelement.image = loadSurface("./Images/menuYellow.png"); break;
+                    case 3: EGelement.image = loadSurface("./Images/menuRed.png"); break;
+                }
             }
-        }
 
         /*Sound Element Button*/
         SoundElement.posX = 32;
@@ -1042,12 +1064,33 @@ void Buttons(SDL_Event e){
                   }
               }
           }
+
+          /*EGMen Button*/
+          if(Mx < (268) && Mx > (238)
+          && My < (274) && My > (238)){
+              if(ThreatLevel == 3) EGMen.image = loadSurface("./Images/menuHoverRed.png");
+              if(ThreatLevel == 1) EGMen.image = loadSurface("./Images/menuHoverBlue.png");
+          }
+          else{
+              if(ThreatLevel == 3) EGMen.image = loadSurface("./Images/menuRed.png");
+              if(ThreatLevel == 1) EGMen.image = loadSurface("./Images/menuBlue.png");
+          }
+
+          /*Ranking Button*/
+          if(Mx < () && Mx > ()
+          && My < () && My > ()) /*##########################*/
+
+          /*Replay Button*/
     }
 }
 
 void Play(){
     SDL_Event e;
     interface = 2;
+
+    if(!play){
+        PreparePlay();
+    }
 
     while( SDL_PollEvent( &e ) != 0 )
     {
@@ -1088,11 +1131,11 @@ void Play(){
           GetLifeSurface();
     }
 
-    if (PlayEnd()==1){
+    if (PlayEnd(e)==1){
       printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
-      interface = 1;
-      ThreatLevel = 1;
-      makeBACKGROUND();
+      /*interface = 1;*/
+      /*ThreatLevel = 1;*/
+      /*makeBACKGROUND();*/
     }
 
 }
@@ -1376,6 +1419,31 @@ int PrepareGame()
                     0,
                     0,
                     NULL);
+
+  EGUI = createELEMENT(
+                    SCREEN_WIDTH/2 - 100,
+                    SCREEN_HEIGHT/2 - 125,
+                    0,
+                    NULL);
+
+ EGMen = createELEMENT(
+                    238,
+                    238,
+                    0,
+                    NULL);
+
+ EGR = createELEMENT(
+                    305,
+                    272,
+                    0,
+                    NULL);
+
+ EGRank = createELEMENT(
+                    372,
+                    238,
+                    0,
+                    NULL);
+
   return 0;
 }
 
@@ -1393,7 +1461,7 @@ void PreparePlay(){
     play = 1;
 }
 
-int PlayEnd(){
+int PlayEnd(SDL_Event e){
     int i, j, stop = false;
     for(i=16, j=0; j<BALLX; j++){
         if(ballgrid[i][j].color){
@@ -1409,8 +1477,12 @@ int PlayEnd(){
         SDL_Delay(DELAY*5);
         RefreshScreen();
     }
-    play = 0;
+    ball.image = NULL;
+    nextball.image = NULL;
+    clicked = 1;
+    play = -1;
     cleanGrid();
+    EndGameUI(e);
     return 1;
 }
 
@@ -1609,6 +1681,9 @@ void checkDestruction(NPC* npc, int checkcolor)
 
     currentCount++;
     printf("currentCount = %d\n", currentCount);
+    printf("ballCount = %d\n", ballCount);
+
+    if (currentCount == 1 && ballCount == 1) return;
 
     if (ballCount == 0)
     {
@@ -1619,7 +1694,7 @@ void checkDestruction(NPC* npc, int checkcolor)
         currentCount = 0;
         return;
     }
-    else if (ballCount > 2)
+    if (ballCount > 2)
     {
         /* printf("ballCount = %d\n", ballCount); */
         ballCount = 0;
@@ -1727,6 +1802,7 @@ void GetThreatLevel(){
             EGelement.image = loadSurface( "./Images/menuBlue.png");
             if(Sound) SoundElement.image = loadSurface("./Images/soundOnBlue.png");
             else SoundElement.image = loadSurface("./Images/soundOffBlue.png");
+
         break;
         case 2:
             PMUI.image = loadSurface( "./Images/uiYellow.png");
@@ -1816,3 +1892,45 @@ void GetScore(){
     TTF_CloseFont( font );
     /*surfaceMessage = NULL;*/
 }
+
+void EndGameUI(SDL_Event e){
+    int Mx, My;
+    switch(ThreatLevel){
+        case 1:
+            EGUI.image = loadSurface("./Images/victory.png");
+            EGR.image = loadSurface("./Images/returnBlue.png");
+            EGMen.image = loadSurface("./Images/menuBlue.png");
+            EGRank.image = loadSurface("./Images/rankBlue.png");
+        break;
+        case 3:
+            EGUI.image = loadSurface("./Images/defeat.png");
+            EGR.image = loadSurface("./Images/returnRed.png");
+            EGMen.image = loadSurface("./Images/menuRed.png");
+            EGRank.image = loadSurface("./Images/rankRed.png");
+        break;
+    }
+    SDL_GetMouseState( &Mx, &My );
+
+
+
+}
+
+/*
+EGMen = createELEMENT(
+                   238,
+                   238,
+                   0,
+                   NULL);
+
+EGR = createELEMENT(
+                   305,
+                   272,
+                   0,
+                   NULL);
+
+EGRank = createELEMENT(
+                   372,
+                   238,
+                   0,
+                   NULL);
+*/
