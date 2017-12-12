@@ -691,7 +691,8 @@ NPC createNPC(float posY, float posX,
 void makeBACKGROUND()
 {
   if (interface == 1) backg.image = loadSurface( "./Images/menuBG.png" );
-  if (interface == 2 || interface == 3 || interface == 4) backg.image = loadSurface( "./Images/BG.png");
+  if (interface == 2) backg.image = loadSurface( "./Images/BG2.png" );
+  if (interface == 3 || interface == 4) backg.image = loadSurface( "./Images/BG.png");
 }
 
 /*
