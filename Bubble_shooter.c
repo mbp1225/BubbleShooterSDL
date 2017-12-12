@@ -167,6 +167,12 @@ UIELEMENT EGMen;
 /*EndGame Ranking*/
 UIELEMENT EGRank;
 
+/*Credits UI*/
+UIELEMENT CredElement;
+
+/*Ranking UI*/
+UIELEMENT RankElement;
+
 /*Ball Grid [Y][X]*/
 NPC ballgrid[20][20];
 
@@ -304,6 +310,9 @@ void drawBACKGROUND(BACKGROUND b);
 /*Displayes UI element on screen*/
 void drawELEMENT(UIELEMENT u, int imageW, int imageH);
 
+/*(tries to) draw a star*/
+void DrawStar();
+
 /*Game Function*/
 void Game();
 
@@ -318,6 +327,12 @@ void Play();
 
 /*Main Menu Function*/
 void MainMenu();
+
+/*Highscores Function*/
+void Highscores();
+
+/*Credits Function*/
+void Credits();
 
 /*Sound Button Function*/
 void Buttons(SDL_Event e);
@@ -676,7 +691,7 @@ NPC createNPC(float posY, float posX,
 void makeBACKGROUND()
 {
   if (interface == 1) backg.image = loadSurface( "./Images/menuBG.png" );
-  if (interface == 2) backg.image = loadSurface( "./Images/BG.png");
+  if (interface == 2 || interface == 3 || interface == 4) backg.image = loadSurface( "./Images/BG.png");
 }
 
 /*
@@ -848,6 +863,18 @@ void RefreshScreen()
 
     }
 
+    /*Highscores Refresh Screen*/
+    if(interface == 3){
+        drawELEMENT(RankElement, 440, 440);
+        drawELEMENT(EGelement, 38, 38);
+    }
+
+    /*Highscores Refresh Screen*/
+    if(interface == 4){
+        drawELEMENT(CredElement, 300, 200);
+        drawELEMENT(EGelement, 38, 38);
+    }
+
     /*Update the surface*/
     SDL_UpdateWindowSurface( gWindow );
 
@@ -916,8 +943,10 @@ void Game(){
             Play();
             break;
         case 3: /*Highscores*/
+            Highscores();
             break;
         case 4: /*Credits*/
+            Credits();
             break;
     }
     RefreshScreen();
@@ -942,6 +971,24 @@ void MainMenu(){
 }
 
 void Highscores(){
+    SDL_Event e;
+
+    while( SDL_PollEvent(&e) != 0)
+    {
+        Buttons(e);
+        switch(e.type){
+            case SDL_QUIT:
+                quit = true;
+            break;
+            case SDL_KEYDOWN:
+                if(e.key.keysym.sym == SDLK_ESCAPE)
+                    quit = true;
+            break;
+        }
+    }
+}
+
+void Credits(){
     SDL_Event e;
 
     while( SDL_PollEvent(&e) != 0)
@@ -987,23 +1034,34 @@ void Buttons(SDL_Event e){
             }
 
         /*Main Menu Buttons*/
-        if(!(Mx > 110 && Mx < 210 && My > 210 && My < 317)){
+        if(!(Mx > 110 && Mx < 210 && My > 210 && My < 359)){
             ArrowElement.image = NULL;
         }
         else if(Mx > 110 && Mx < 210){
             ArrowElement.image = loadSurface("./Images/arrow.png");
             if(My > 210 && My < 235){
-                ArrowElement.posY = 203;
+                ArrowElement.posY = 208;
                 if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                 interface = 2;
                 makeBACKGROUND();
                 }
             }
             if(My > 250 && My < 275){
-                ArrowElement.posY = 245;
+                ArrowElement.posY = 250;
+                if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                    interface = 3;
+                    makeBACKGROUND();
+                }
             }
             if(My > 290 && My < 317){
-                ArrowElement.posY = 287;
+                ArrowElement.posY = 292;
+                if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                    interface = 4;
+                    makeBACKGROUND();
+                }
+            }
+            if(My > 332 && My < 359){
+                ArrowElement.posY = 334;
                 if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
                     quit = true;
                 }
@@ -1013,7 +1071,7 @@ void Buttons(SDL_Event e){
 
     }
 
-    if(interface == 2){
+    if(interface == 2 || interface == 3 || interface == 4){
         /*End Game Button*/
         if((Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
         && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38))
@@ -1037,7 +1095,6 @@ void Buttons(SDL_Event e){
               cleanGrid();
               makeBACKGROUND();
               EGelement.image = loadSurface("./Images/menuBlue.png");
-              /*interface = 3*/
             }
             if(!(Mx < (268) && Mx > (238) && My < (274) && My > (238) )){
                 switch(ThreatLevel){
@@ -1133,6 +1190,16 @@ void Buttons(SDL_Event e){
           && My < (274) && My > (238)){
               if(ThreatLevel == 3) EGRank.image = loadSurface("./Images/rankHoverRed.png");
               if(ThreatLevel == 1) EGRank.image = loadSurface("./Images/rankHoverBlue.png");
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+                EGUI.image = NULL;
+                EGR.image = NULL;
+                EGRank.image = NULL;
+                EGMen.image = NULL;
+                interface = 3;
+                ThreatLevel = 1;
+                printf("%d\n", ThreatLevel);
+                play = 0;
+              }
           }
           else{
               if(ThreatLevel == 3) EGRank.image = loadSurface("./Images/rankRed.png");
@@ -1465,7 +1532,7 @@ int PrepareGame()
                   NULL);
 
   ArrowElement = createELEMENT(
-                    72,
+                    79,
                     -38,
                     0,
                     NULL);
@@ -1499,6 +1566,18 @@ int PrepareGame()
                     238,
                     0,
                     NULL);
+
+ CredElement = createELEMENT(
+                    SCREEN_WIDTH/2-150,
+                    SCREEN_HEIGHT/2-100,
+                    0,
+                    loadSurface("./Images/credits.png"));
+
+ RankElement = createELEMENT(
+                    SCREEN_WIDTH/2-220,
+                    SCREEN_HEIGHT/2-220,
+                    0,
+                    loadSurface("./Images/TopPlayers.png"));
 
   return 0;
 }
@@ -2073,4 +2152,28 @@ void GetInput(SDL_Event e){
         SDL_FreeSurface(NickSurface);
 
         TTF_CloseFont( font );
+}
+
+void DrawStar(){
+    SDL_Surface* StarSurface = NULL;
+    SDL_Rect Star_Rect;
+
+    static int spriteimg = 0;
+
+    if(spriteimg == 0){
+        Star_Rect.x = SCREEN_WIDTH/2;
+        Star_Rect.y = SCREEN_HEIGHT/2;
+        Star_Rect.w = 4;
+        Star_Rect.h = 4;
+    }
+
+        if (spriteimg<50) StarSurface = loadSurface("./Images/star1_0.png");
+        if (spriteimg < 100 && spriteimg >= 0) StarSurface = loadSurface("./Images/star1_1.png");
+        if (spriteimg < 150 && spriteimg >= 100) StarSurface = loadSurface("./Images/star1_2.png");
+
+    SDL_BlitSurface( StarSurface, NULL, gScreenSurface, &Star_Rect );
+    SDL_FreeSurface(StarSurface);
+
+    spriteimg++;
+    if (spriteimg > 150) spriteimg = 0;
 }
