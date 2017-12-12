@@ -48,7 +48,7 @@ const int MSPEED = 8;
 const int COLRADIUS = 8;
 
 /*Amount of different colors for the balls*/
-const int COLORS = 2;
+const int COLORS = 6;
 
 /*Ballgrid size*/
 const int BALLX = 20;
@@ -1487,7 +1487,7 @@ int PrepareGame()
 
   interface = 1;
   /*####*/
-  Sound = false;
+  Sound = true;
 
   /*Create Background*/
   makeBACKGROUND();
