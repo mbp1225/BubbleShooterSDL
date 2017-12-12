@@ -397,15 +397,15 @@ NPC* collision()
         ball.stepX = 0;
         clicked = 0;
         health--;
-        printGrid();
+        /*#printGrid();#*/
         GetThreatLevel();
         GetLifeSurface();
 
         if (PlayWin()){
-            printf("\nnão fez mais que a sua obrigação\n");
+            /*printf("\nnão fez mais que a sua obrigação\n");*/
         }
 
-        printf("Score = %d\nThreatLevel = %d\n", Score, ThreatLevel);
+        /*printf("Score = %d\nThreatLevel = %d\n", Score, ThreatLevel);*/
     }
     return n;
 }
@@ -529,7 +529,7 @@ NPC* NPCCollision()
 
     if (colNPC)
     {
-      printf("Colidiu!\n");
+      /*printf("Colidiu!\n");*/
         switch(colNPC->coltype)
         {
             case 1:
@@ -1198,7 +1198,8 @@ void Buttons(SDL_Event e){
                 EGMen.image = NULL;
                 interface = 3;
                 ThreatLevel = 1;
-                printf("%d\n", ThreatLevel);
+                makeBACKGROUND();
+                /*printf("%d\n", ThreatLevel);*/
                 play = 0;
               }
           }
@@ -1230,7 +1231,7 @@ void Play(){
             {
                 case SDLK_UP: /* printf("UP\n"); */
                 break;
-                case SDLK_DOWN: if(play == 1) gridDown();
+                case SDLK_DOWN: /*if(play == 1) gridDown();*/
                 break;
                 case SDLK_ESCAPE: quit = true;
                 break;
@@ -1257,7 +1258,7 @@ void Play(){
       }
 
       if(PlayEnd() == 1){
-            printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");
+            /*printf("\n\n\n\n\n\n\n\n\n\n\t\t\t\t   FRACASSADO\n\n\n\n\n\n\n\n\n\n\n\n\n");*/
             /*interface = 1;*/
             /*ThreatLevel = 1;*/
             /*makeBACKGROUND();*/
@@ -1356,16 +1357,16 @@ int loadMedia()
 void closing()
 {
     /*int i, j;*/
-    printf("entered closing\n");
+    /*printf("entered closing\n");*/
     SDL_FreeSurface(gScreenSurface);
     gScreenSurface = NULL;
 
-    printf("freed Screen surface\n");
+    /*printf("freed Screen surface\n");*/
 
     /*Free loaded image*/
     if(BallSurface != NULL)
         SDL_FreeSurface( BallSurface );
-    printf("freed ballsurface\n");
+    /*printf("freed ballsurface\n");*/
 
     /*for (i=0; i<BALLY; i++)
         for(j=0; j<BALLX; j++)
@@ -1375,11 +1376,11 @@ void closing()
 
     if(ball.image != NULL)
         /*SDL_FreeSurface(ball.image);*/
-    printf("freed ball.npc surface\n");
+    /*printf("freed ball.npc surface\n");*/
 
     if(nextball.image != NULL)
         SDL_FreeSurface(nextball.image);
-    printf("freed nextball surface\n");
+    /*printf("freed nextball surface\n");*/
 
     /*for (i=0; i<6; i++)
         if(lifeballs[i].image != NULL)
@@ -1388,24 +1389,24 @@ void closing()
 
     if (SoundElement.image != NULL)
         SDL_FreeSurface(SoundElement.image);
-    printf("freed soundelement surface\n");
+    /*printf("freed soundelement surface\n");*/
 
     if (EGelement.image != NULL)
         SDL_FreeSurface(EGelement.image);
-    printf("freed EGelement surface\n");
+    /*printf("freed EGelement surface\n");*/
 
     if (EGelement.image != NULL)
         SDL_FreeSurface(ArrowElement.image);
-    printf("freed arrow element surface\n");
+    /*printf("freed arrow element surface\n");*/
 
     if (EGelement.image != NULL)
         SDL_FreeSurface(backg.image);
-    printf("freed bakcground image surface\n");
+    /*printf("freed bakcground image surface\n");*/
 
     /*Destroy window*/
     SDL_DestroyWindow( gWindow );
     gWindow = NULL;
-    printf("freed gWindow\n");
+    /*printf("freed gWindow\n");*/
 
     /* clean up our resources */
 	/*Mix_FreeChunk(wave);*/
@@ -1419,13 +1420,13 @@ void closing()
 
     /*Quit SDL subsystems*/
     IMG_Quit();
-    printf("quitted img\n");
+    /*printf("quitted img\n");*/
     TTF_Quit();
-    printf("quitted ttf\n");
+    /*printf("quitted ttf\n");*/
     Mix_Quit();
-    printf("quitted mix\n");
+    /*printf("quitted mix\n");*/
     SDL_Quit();
-    printf("quitted SDL\n");
+    /*printf("quitted SDL\n");*/
 }
 
 SDL_Surface* loadSurface( char *path )
@@ -1830,11 +1831,11 @@ void checkDestruction(NPC* npc, int checkcolor)
     int n;
     int j;
 
-    printf("Entrou no check!\n");
+    /*printf("Entrou no check!\n");*/
 
     currentCount++;
-    printf("currentCount = %d\n", currentCount);
-    printf("ballCount = %d\n", ballCount);
+    /*printf("currentCount = %d\n", currentCount);
+    printf("ballCount = %d\n", ballCount);*/
 
     if (currentCount == 1 && ballCount == 1) return;
 
@@ -1864,9 +1865,9 @@ void checkDestruction(NPC* npc, int checkcolor)
         destructionStart = NULL;
         currentCount = 0;
         health++;
-        printf("Destruiu!\n");
+        /*printf("Destruiu!\n");*/
         if (PlayWin()){
-            printf("\nnão fez mais que a sua obrigação\n");
+            /*printf("\nnão fez mais que a sua obrigação\n");*/
         }
         return;
     }
