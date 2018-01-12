@@ -1072,11 +1072,11 @@ void Buttons(SDL_Event e){
 
     }
 
-    if(interface == 2 || interface == 3 || interface == 4){
+    if((interface == 2 || interface == 3 || interface == 4)){
         /*End Game Button*/
         if((Mx < (SCREEN_WIDTH - 2*IMAGE_WIDTH + 38) && Mx > (SCREEN_WIDTH - 2*IMAGE_WIDTH -2)
         && My > (SCREEN_HEIGHT- 41) && My < (SCREEN_HEIGHT - 41 + 38))
-        || (Mx < (268) && Mx > (238) && My < (274) && My > (238) )){
+        || (( (Mx < 268) && (Mx > 238) && (My < 274) && (My > 238) ) && (play == -1))){
             if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
               interface = 1;
               play = 0;
@@ -1170,7 +1170,7 @@ void Buttons(SDL_Event e){
           && My < (306) && My > (272)){
               if(ThreatLevel == 3) EGR.image = loadSurface("./Images/returnHoverRed.png");
               if(ThreatLevel == 1) EGR.image = loadSurface("./Images/returnHoverBlue.png");
-              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT && play == -1){
                 EGUI.image = NULL;
                 EGR.image = NULL;
                 EGRank.image = NULL;
@@ -1191,7 +1191,7 @@ void Buttons(SDL_Event e){
           && My < (274) && My > (238)){
               if(ThreatLevel == 3) EGRank.image = loadSurface("./Images/rankHoverRed.png");
               if(ThreatLevel == 1) EGRank.image = loadSurface("./Images/rankHoverBlue.png");
-              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT){
+              if(e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT && play == -1){
                 EGUI.image = NULL;
                 EGR.image = NULL;
                 EGRank.image = NULL;
